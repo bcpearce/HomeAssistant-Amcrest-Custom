@@ -1,0 +1,1 @@
+"""Buttons for Amcrest camera."""

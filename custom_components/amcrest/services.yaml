@@ -1,0 +1,76 @@
+pan:
+  target: &target
+    entity:
+      integration: amcrest
+      domain: camera
+  fields:
+    pan_direction:
+      selector:
+        select:
+          translation_key: "pan_direction"
+          options:
+            - "left"
+            - "right"
+          mode: dropdown
+    distance: &distance
+      default: 0.1
+      selector:
+        number:
+          min: 0
+          max: 1
+          step: 0.01
+    speed: &speed
+      default: 1
+      selector:
+        number:
+          min: 0
+          max: 8
+          step: 1
+    continuous_duration_seconds: &continuous_duration_seconds
+      default: 0.5
+      selector:
+        number:
+          min: 0
+          max: 5
+          step: 0.01
+    move_mode: &move_mode
+      default: "relative"
+      selector:
+        select:
+          translation_key: "move_mode"
+          options:
+            # - "absolute"
+            - "continuous"
+            - "relative"
+            - "stop"
+
+tilt:
+  target: *target
+  fields:
+    tilt_direction:
+      selector:
+        select:
+          translation_key: "tilt_direction"
+          options:
+            - "down"
+            - "up"
+          mode: dropdown
+    distance: *distance
+    speed: *speed
+    continuous_duration_seconds: *continuous_duration_seconds
+    move_mode: *move_mode
+zoom:
+  target: *target
+  fields:
+    zoom_direction:
+      selector:
+        select:
+          translation_key: "zoom_direction"
+          options:
+            - "in"
+            - "out"
+          mode: dropdown
+    distance: *distance
+    speed: *speed
+    continuous_duration_seconds: *continuous_duration_seconds
+    move_mode: *move_mode

@@ -1,0 +1,43 @@
+repos:
+  - repo: local
+    hooks:
+      - id: check_version
+        name: check_version
+        language: system
+        entry: python hooks/check_version.py
+        files: ^(custom_components/.+/manifest\.json|pyproject.\toml|poetry\.lock)$
+      - id: hassfest
+        name: hassfest
+        language: script
+        entry: hooks/hassfest.sh
+        files: ^(custom_components/.+/(icons|manifest|strings)\.json|custom_components/.+/translations/.+\.json|custom_components/.+/(quality_scale)\.yaml|custom_components/brands/.*\.json|custom_components/.+/services\.yaml|script/hassfest/(?!metadata|mypy_config).+\.py|requirements.+\.txt)$
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+    - id: trailing-whitespace
+    - id: end-of-file-fixer
+    - id: check-yaml
+    - id: check-added-large-files
+    - id: check-json
+    - id: check-toml
+    - id: pretty-format-json
+      args:
+        - --autofix
+        - --top-keys=domain,title,name
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.9.1
+    hooks:
+    - id: ruff
+      args: [ --fix ]
+    - id: ruff-format
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: 'v1.14.1'  # Use the sha / tag you want to point at
+    hooks:
+    -   id: mypy
+        additional_dependencies:
+          - homeassistant
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.3.0
+    hooks:
+    - id: codespell
+      exclude: "^tests/fixtures/mock_responses"

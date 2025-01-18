@@ -1,0 +1,13 @@
+{
+  "services": {
+    "pan": {
+      "service": "mdi:pan-horizontal"
+    },
+    "tilt": {
+      "service": "mdi:pan-vertical"
+    },
+    "zoom": {
+      "service": "mdi:magnify-plus"
+    }
+  }
+}

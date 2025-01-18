@@ -1,0 +1,26 @@
+{
+  "domain": "amcrest",
+  "name": "Amcrest",
+  "codeowners": [
+    "@bcpearce"
+  ],
+  "config_flow": true,
+  "dhcp": [
+    {
+      "macaddress": "9C8ECD*"
+    },
+    {
+      "macaddress": "A06032*"
+    }
+  ],
+  "documentation": "https://www.home-assistant.io/integrations/amcrest",
+  "integration_type": "device",
+  "iot_class": "local_push",
+  "loggers": [
+    "amcrest"
+  ],
+  "requirements": [
+    "amcrest_api==0.1.0a"
+  ],
+  "version": "0.1.0"
+}
