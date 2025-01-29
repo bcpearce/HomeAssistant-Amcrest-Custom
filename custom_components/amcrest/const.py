@@ -7,6 +7,7 @@ DOMAIN: Final = "amcrest"
 MANUFACTURER: Final = "Amcrest"
 
 DEFAULT_PORT_HTTP = 80
+CONF_MDNS: Final = "mdns"
 
 
 class PtzAxes(StrEnum):

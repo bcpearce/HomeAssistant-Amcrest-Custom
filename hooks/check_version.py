@@ -1,14 +1,13 @@
 #!/usr/bin/python
 import importlib.metadata
 import json
-
 import tomllib
 
 if __name__ == "__main__":
     """Check if the version in pyproject.toml matches the manifest."""
     try:
-        installed_version = importlib.metadata.version("homeassistant-gtfs-realtime")
-        with open("custom_components/gtfs_realtime/manifest.json") as f:
+        installed_version = importlib.metadata.version("homeassistant-amcrest-custom")
+        with open("custom_components/homassistant_amcrest_custom/manifest.json") as f:
             manifest_version = json.load(f)["version"]
         with open("pyproject.toml", "rb") as f:
             pyproject_version = tomllib.load(f)["tool"]["poetry"]["version"]

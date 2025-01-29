@@ -1,10 +1,12 @@
 pan:
-  target: &target
-    entity:
-      integration: amcrest
-      domain: camera
   fields:
+    device_id: &device_id
+      required: true
+      selector:
+        device:
+          integration: amcrest
     pan_direction:
+      required: true
       selector:
         select:
           translation_key: "pan_direction"
@@ -45,8 +47,8 @@ pan:
             - "stop"
 
 tilt:
-  target: *target
   fields:
+    device_id: *device_id
     tilt_direction:
       selector:
         select:
@@ -59,9 +61,10 @@ tilt:
     speed: *speed
     continuous_duration_seconds: *continuous_duration_seconds
     move_mode: *move_mode
+
 zoom:
-  target: *target
   fields:
+    device_id: *device_id
     zoom_direction:
       selector:
         select:
