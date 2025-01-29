@@ -1,23 +1,39 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = []
+
 [project]
 name="homeassistant-amcrest-custom"
-version="0.1.0"
 description="Custom Amcrest integration for Home Assistant to replace the default."
 readme = "README.md"
+version = "0.1.0"
 requires-python = ">=3.13,<3.14"
 dependencies = [
+    "amcrest_api>=0.1.0a2",
 ]
 
 [dependency-groups]
 dev = [
-    "codespell>=2.3.0",
-    "homeassistant>=2024.12.5",
-    "pre-commit>=4.0.1",
-    "pytest-homeassistant-custom-component>=0.13.195",
-    "ruff>=0.9.2",
+  "codespell>=2.3.0",
+  "colorlog>=6.9.0",
+  "coverage-badge>=1.1.2",
+  "mypy>=1.14.1",
+  "pre-commit>=4.0.1",
+  "pytest>=8.3.4",
+  "pytest-homeassistant-custom-component>=0.13.205",
+  "ruff>=0.9.2",
+]
+fix-hass-error = [
+  "habluetooth==3.7.0",
+  "bleak_esphome==2.0.0"
 ]
 
 [tool.codespell]
 ignore-words-list="hass"
+skip="uv.lock"
 
 [tool.mypy]
 python_version = "3.13"
@@ -38,3 +54,27 @@ disallow_untyped_decorators = true
 disallow_untyped_defs = true
 warn_return_any = true
 warn_unreachable = true
+disable_error_code = "union-attr"
+
+[tool.ruff.lint]
+select = [
+  "E",
+  "F",
+  "UP",
+  "B",
+  "SIM",
+  "I",
+  "TC",
+]
+
+[tool.ruff.format]
+docstring-code-format = true
+quote-style = "double"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+addopts = "--cov=custom_components.amcrest --cov-report=xml --junitxml test_results.xml"
+testpaths = "tests"
+
+[tool.coverage.run]
+omit = ["amcrest_api/__main__.py"]

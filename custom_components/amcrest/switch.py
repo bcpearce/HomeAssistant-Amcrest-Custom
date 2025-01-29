@@ -2,22 +2,16 @@
 
 from typing import Any
 
-from homeassistant.components.camera import (
-    DOMAIN as CAMERA_DOMAIN,
-    SERVICE_DISABLE_MOTION as CAMERA_SERVICE_DISABLE_MOTION,
-    SERVICE_ENABLE_MOTION as CAMERA_SERVICE_ENABLE_MOTION,
-    SERVICE_TURN_OFF as CAMERA_SERVICE_TURN_OFF,
-    SERVICE_TURN_ON as CAMERA_SERVICE_TURN_ON,
-)
-from homeassistant.components.switch import SwitchDeviceClass, SwitchEntity
-from homeassistant.const import ATTR_DEVICE_ID
-from homeassistant.core import HomeAssistant, callback
 import homeassistant.helpers.device_registry as dr
+from homeassistant.components.switch import SwitchDeviceClass, SwitchEntity
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from . import AmcrestConfigEntry, AmcrestDataCoordinator
+
+PARALLEL_UPDATES = 0
 
 
 async def async_setup_entry(
@@ -31,7 +25,7 @@ async def async_setup_entry(
     async_add_entities(
         [
             AmcrestPrivacyModeSwitch(coordinator),
-            AmcrestMotionDetectionSwitch(coordinator),
+            AmcrestPtzSmartTrackSwitch(coordinator),
         ]
     )
 
@@ -60,25 +54,20 @@ class AmcrestPrivacyModeSwitch(CoordinatorEntity[AmcrestDataCoordinator], Switch
         self._attr_device_info: dr.DeviceInfo = coordinator.device_info
         self._attr_is_on = self.coordinator.amcrest_data.privacy_mode_on
 
+    async def _handle_privacy_mode(self, is_on: bool) -> None:
+        await self.coordinator.api.async_set_privacy_mode_on(is_on)
+        await self.coordinator.async_refresh()
+        # Note this is inverse to camera "on" state
+        self._attr_is_on = is_on
+        self.async_write_ha_state()
+
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn privacy mode on (Camera Off)."""
-        await self.hass.services.async_call(
-            CAMERA_DOMAIN,
-            CAMERA_SERVICE_TURN_OFF,
-            target={ATTR_DEVICE_ID: _async_get_device_id(self)},
-        )
-        self._attr_is_on = True
-        self.async_write_ha_state()
+        await self._handle_privacy_mode(True)
 
     async def async_turn_off(self, **kwargs: Any) -> None:
         """Turn the entity off (Camera On)."""
-        await self.hass.services.async_call(
-            CAMERA_DOMAIN,
-            CAMERA_SERVICE_TURN_ON,
-            target={ATTR_DEVICE_ID: _async_get_device_id(self)},
-        )
-        self._attr_is_on = False
-        self.async_write_ha_state()
+        await self._handle_privacy_mode(False)
 
     @callback
     def _handle_coordinator_update(self) -> None:
@@ -86,45 +75,36 @@ class AmcrestPrivacyModeSwitch(CoordinatorEntity[AmcrestDataCoordinator], Switch
         self.async_write_ha_state()
 
 
-class AmcrestMotionDetectionSwitch(
+class AmcrestPtzSmartTrackSwitch(
     CoordinatorEntity[AmcrestDataCoordinator], SwitchEntity
 ):
-    """Privacy Mode Switch. Implement Camera On/Off."""
+    """Smart Track Switch. Automatically tracks detected motion."""
 
     _attr_has_entity_name = True
-    _attr_translation_key = "enable_motion_detection"
+    _attr_translation_key = "smart_track"
     _attr_device_class = SwitchDeviceClass.SWITCH
 
     def __init__(self, coordinator: AmcrestDataCoordinator) -> None:
         """Initialize the switch."""
         super().__init__(coordinator=coordinator)
-        self._attr_unique_id = (
-            f"{coordinator.fixed_config.serial_number}-enable_motion_detection"
-        )
+        self._attr_unique_id = f"{coordinator.fixed_config.serial_number}-smart_track"
         self._attr_device_info = coordinator.device_info
-        self._attr_is_on = coordinator.is_listening_for_events
+        self._attr_is_on = coordinator.amcrest_data.smart_track_on
+
+    async def _handle_smart_track(self, turn_on: bool) -> None:
+        await self.coordinator.api.async_set_smart_track_on(turn_on)
+        self._attr_is_on = turn_on
+        self.async_write_ha_state()
 
     async def async_turn_on(self, **kwargs: Any) -> None:
-        """Turn privacy mode on (Camera Off)."""
-        await self.hass.services.async_call(
-            CAMERA_DOMAIN,
-            CAMERA_SERVICE_ENABLE_MOTION,
-            target={ATTR_DEVICE_ID: _async_get_device_id(self)},
-        )
-        self._attr_is_on = True
-        self.async_write_ha_state()
+        """Turn smart tracking on."""
+        await self._handle_smart_track(True)
 
     async def async_turn_off(self, **kwargs: Any) -> None:
-        """Turn the entity off (Camera On)."""
-        await self.hass.services.async_call(
-            CAMERA_DOMAIN,
-            CAMERA_SERVICE_DISABLE_MOTION,
-            target={ATTR_DEVICE_ID: _async_get_device_id(self)},
-        )
-        self._attr_is_on = False
-        self.async_write_ha_state()
+        """Turn smart tracking off."""
+        await self._handle_smart_track(False)
 
     @callback
     def _handle_coordinator_update(self) -> None:
-        self._attr_is_on = self.coordinator.is_listening_for_events
+        self._attr_is_on = self.coordinator.amcrest_data.smart_track_on
         self.async_write_ha_state()

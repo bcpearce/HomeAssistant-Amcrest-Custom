@@ -5,22 +5,40 @@
     "@bcpearce"
   ],
   "config_flow": true,
-  "dhcp": [
-    {
-      "macaddress": "9C8ECD*"
-    },
-    {
-      "macaddress": "A06032*"
-    }
-  ],
-  "documentation": "https://www.home-assistant.io/integrations/amcrest",
+  "documentation": "https://github.com/bcpearce/homeassistant-amcrest-custom",
   "integration_type": "device",
   "iot_class": "local_push",
   "loggers": [
     "amcrest"
   ],
   "requirements": [
-    "amcrest_api==0.1.0a"
+    "amcrest_api==0.1.0a2"
   ],
-  "version": "0.1.0"
+  "version": "0.1.0",
+  "zeroconf": [
+    {
+      "properties": {
+        "mac": "9c:8e:cd:*"
+      },
+      "type": "_http._tcp.local."
+    },
+    {
+      "properties": {
+        "mac": "a0:60:32:*"
+      },
+      "type": "_http._tcp.local."
+    },
+    {
+      "properties": {
+        "mac": "00:65:1e:*"
+      },
+      "type": "_http._tcp.local."
+    },
+    {
+      "properties": {
+        "mac": "a0:60:32:*"
+      },
+      "type": "_http._tcp.local."
+    }
+  ]
 }

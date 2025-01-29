@@ -4,35 +4,22 @@
       "cannot_connect": "[%key:common::config_flow::error::cannot_connect%]",
       "invalid_auth": "[%key:common::config_flow::error::invalid_auth%]"
     },
+    "flow_title": "{camera_discovered_name}",
     "step": {
-      "configure_camera": {
-        "data": {
-          "Sensors": "Select Sensors",
-          "binary_senors": "Select Binary Sensors",
-          "ffmpeg_arguments": "FFMPEG Arguments",
-          "resolution": "Resolution",
-          "scan_interval": "Scan Interval",
-          "stream_source": "Stream Source",
-          "switches": "Select Switches"
-        },
-        "data_description": {
-          "ffmpeg_arguments": "Additional Arguments to pass on the command line to FFMPEG.",
-          "scan_interval": "Scan interval for polled sensors."
-        }
-      },
       "user": {
         "data": {
-          "host": "[%key:common::config_flow::data::host%]",
-          "password": "[%key:common::config_flow::data::password%]",
-          "port": "[%key:common::config_flow::data::password%]",
-          "username": "[%key:common::config_flow::data::username%]"
+          "host": "Host",
+          "password": "Password",
+          "port": "Port",
+          "username": "Username"
         },
         "data_description": {
           "host": "Local IP Address or Hostname for Amcrest camera.",
           "password": "Your password for the Amcrest camera.",
           "port": "Port number for http requests to the camera.",
           "username": "Your username for the Amcrest camera. It is recommended to create new user credentials for the HomeAssistant integration."
-        }
+        },
+        "description": "Setup Amcrest Camera {target_device}"
       }
     }
   },
@@ -45,6 +32,12 @@
     "camera": {
       "main_stream": {
         "name": "Main Stream"
+      },
+      "sub_stream_1": {
+        "name": "Sub Stream 1"
+      },
+      "sub_stream_2": {
+        "name": "Sub Stream 2"
       }
     },
     "select": {
@@ -69,7 +62,18 @@
       },
       "privacy_mode": {
         "name": "Privacy Mode"
+      },
+      "smart_track": {
+        "name": "Smart Tracking"
       }
+    }
+  },
+  "exceptions": {
+    "device_detection_failed": {
+      "message": "Camera device with mDNS name {mdns_name} not found"
+    },
+    "device_not_found": {
+      "message": "Camera device with ID {device_id} not found."
     }
   },
   "selector": {
@@ -101,80 +105,6 @@
     }
   },
   "services": {
-    "disable_audio": {
-      "name": "Disable audio",
-      "description": "Disables audio stream.",
-      "fields": {
-        "entity_id": {
-          "name": "[%key:component::amcrest::services::enable_recording::fields::entity_id::name%]",
-          "description": "[%key:component::amcrest::services::enable_recording::fields::entity_id::description%]"
-        }
-      }
-    },
-    "disable_motion_recording": {
-      "name": "Disable motion recording",
-      "description": "Disables recording a clip to camera storage when motion is detected.",
-      "fields": {
-        "entity_id": {
-          "name": "[%key:component::amcrest::services::enable_recording::fields::entity_id::name%]",
-          "description": "[%key:component::amcrest::services::enable_recording::fields::entity_id::description%]"
-        }
-      }
-    },
-    "disable_recording": {
-      "name": "Disable recording",
-      "description": "Disables continuous recording to camera storage.",
-      "fields": {
-        "entity_id": {
-          "name": "[%key:component::amcrest::services::enable_recording::fields::entity_id::name%]",
-          "description": "[%key:component::amcrest::services::enable_recording::fields::entity_id::description%]"
-        }
-      }
-    },
-    "enable_audio": {
-      "name": "Enable audio",
-      "description": "Enables audio stream.",
-      "fields": {
-        "entity_id": {
-          "name": "[%key:component::amcrest::services::enable_recording::fields::entity_id::name%]",
-          "description": "[%key:component::amcrest::services::enable_recording::fields::entity_id::description%]"
-        }
-      }
-    },
-    "enable_motion_recording": {
-      "name": "Enable motion recording",
-      "description": "Enables recording a clip to camera storage when motion is detected.",
-      "fields": {
-        "entity_id": {
-          "name": "[%key:component::amcrest::services::enable_recording::fields::entity_id::name%]",
-          "description": "[%key:component::amcrest::services::enable_recording::fields::entity_id::description%]"
-        }
-      }
-    },
-    "enable_recording": {
-      "name": "Enable recording",
-      "description": "Enables continuous recording to camera storage.",
-      "fields": {
-        "entity_id": {
-          "name": "Entity",
-          "description": "Name(s) of the cameras, or 'all' for all cameras."
-        }
-      }
-    },
-    "goto_preset": {
-      "name": "Go to preset",
-      "description": "Moves camera to PTZ preset.",
-      "fields": {
-        "entity_id": {
-          "name": "[%key:component::amcrest::services::enable_recording::fields::entity_id::name%]",
-          "description": "[%key:component::amcrest::services::enable_recording::fields::entity_id::description%]"
-        },
-        "preset": {
-          "name": "Preset",
-          "description": "Preset number."
-        }
-      }
-    },
     "pan": {
       "name": "Pan",
       "description": "Pan the camera left or right.",
@@ -182,6 +112,10 @@
         "continuous_duration_seconds": {
           "name": "Continuous Duration",
           "description": "Continuous duration in seconds to move the camera. Only applies to continuous movement mode."
+        },
+        "device_id": {
+          "name": "Device",
+          "description": "Device to target the move."
         },
         "distance": {
           "name": "Distance",
@@ -201,77 +135,29 @@
         }
       }
     },
-    "ptz": {
-      "name": "PTZ control",
-      "description": "Moves (pan/tilt) and/or zoom a PTZ camera.",
-      "fields": {
-        "entity_id": {
-          "name": "[%key:component::amcrest::services::enable_recording::fields::entity_id::name%]",
-          "description": "[%key:component::amcrest::services::enable_recording::fields::entity_id::description%]"
-        },
-        "movement": {
-          "name": "Movement",
-          "description": "Direction to move the camera."
-        },
-        "travel_time": {
-          "name": "Travel time",
-          "description": "Travel time in fractional seconds: from 0 to 1."
-        }
-      }
-    },
-    "set_color_bw": {
-      "name": "Set color",
-      "description": "Sets camera color mode.",
-      "fields": {
-        "color_bw": {
-          "name": "Color",
-          "description": "Color mode."
-        },
-        "entity_id": {
-          "name": "[%key:component::amcrest::services::enable_recording::fields::entity_id::name%]",
-          "description": "[%key:component::amcrest::services::enable_recording::fields::entity_id::description%]"
-        }
-      }
-    },
-    "start_tour": {
-      "name": "Start tour",
-      "description": "Starts camera's PTZ tour function.",
-      "fields": {
-        "entity_id": {
-          "name": "[%key:component::amcrest::services::enable_recording::fields::entity_id::name%]",
-          "description": "[%key:component::amcrest::services::enable_recording::fields::entity_id::description%]"
-        }
-      }
-    },
-    "stop_tour": {
-      "name": "Stop tour",
-      "description": "Stops camera's PTZ tour function.",
-      "fields": {
-        "entity_id": {
-          "name": "[%key:component::amcrest::services::enable_recording::fields::entity_id::name%]",
-          "description": "[%key:component::amcrest::services::enable_recording::fields::entity_id::description%]"
-        }
-      }
-    },
     "tilt": {
       "name": "Tilt",
       "description": "Tilt the camera up or down.",
       "fields": {
         "continuous_duration_seconds": {
-          "name": "[%key:component::amcrest::services::pan::fields::continuous_duration_seconds::name%]",
-          "description": "[%key:component::amcrest::services::pan::fields::continuous_duration_seconds::description%]"
+          "name": "Continuous Duration",
+          "description": "Continuous duration in seconds to move the camera. Only applies to continuous movement mode."
+        },
+        "device_id": {
+          "name": "Device",
+          "description": "Device to target the move."
         },
         "distance": {
-          "name": "[%key:component::amcrest::services::pan::fields::distance::name%]",
-          "description": "[%key:component::amcrest::services::pan::fields::distance::description%]"
+          "name": "Distance",
+          "description": "Distance to move the camera, normalized from 0 to 1. Only applies to relative move mode."
         },
         "move_mode": {
-          "name": "[%key:component::amcrest::services::pan::fields::move_mode::name%]",
-          "description": "[%key:component::amcrest::services::pan::fields::move_mode::description%]"
+          "name": "Move Mode",
+          "description": "Movement mode to use. Required fields vary based on selection."
         },
         "speed": {
-          "name": "[%key:component::amcrest::services::pan::fields::speed::name%]",
-          "description": "[%key:component::amcrest::services::pan::fields::speed::description%]"
+          "name": "Speed",
+          "description": "Speed to move the camera. Only applies to continuous movement mode."
         },
         "tilt_direction": {
           "name": "Tilt Direction",
@@ -284,20 +170,24 @@
       "description": "Zoom the camera in or out.",
       "fields": {
         "continuous_duration_seconds": {
-          "name": "[%key:component::amcrest::services::pan::fields::continuous_duration_seconds::name%]",
-          "description": "[%key:component::amcrest::services::pan::fields::continuous_duration_seconds::description%]"
+          "name": "Continuous Duration",
+          "description": "Continuous duration in seconds to move the camera. Only applies to continuous movement mode."
+        },
+        "device_id": {
+          "name": "Device",
+          "description": "Device to target the move."
         },
         "distance": {
-          "name": "[%key:component::amcrest::services::pan::fields::distance::name%]",
-          "description": "[%key:component::amcrest::services::pan::fields::distance::description%]"
+          "name": "Distance",
+          "description": "Distance to move the camera, normalized from 0 to 1. Only applies to relative move mode."
         },
         "move_mode": {
-          "name": "[%key:component::amcrest::services::pan::fields::move_mode::name%]",
-          "description": "[%key:component::amcrest::services::pan::fields::move_mode::description%]"
+          "name": "Move Mode",
+          "description": "Movement mode to use. Required fields vary based on selection."
         },
         "speed": {
-          "name": "[%key:component::amcrest::services::pan::fields::speed::name%]",
-          "description": "[%key:component::amcrest::services::pan::fields::speed::description%]"
+          "name": "Speed",
+          "description": "Speed to move the camera. Only applies to continuous movement mode."
         },
         "zoom_direction": {
           "name": "Zoom Direction",

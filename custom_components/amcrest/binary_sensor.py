@@ -2,20 +2,25 @@
 
 from __future__ import annotations
 
-from amcrest_api.event import EventAction
+from typing import TYPE_CHECKING
 
+from amcrest_api.event import EventAction
 from homeassistant.components.binary_sensor import (
     BinarySensorDeviceClass,
     BinarySensorEntity,
 )
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from . import AmcrestConfigEntry
 from .coordinator import AmcrestDataCoordinator
 
+if TYPE_CHECKING:
+    from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
+    from . import AmcrestConfigEntry
+
+
+# pylint: disable=unused-argument
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: AmcrestConfigEntry,
