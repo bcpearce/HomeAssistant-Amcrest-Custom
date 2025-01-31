@@ -69,7 +69,7 @@ def fixture_mock_config_entry(
     """Fixture for a mock config entry."""
     return MockConfigEntry(
         domain=DOMAIN,
-        data=user_input_valid_connection,
+        data={**user_input_valid_connection, CONF_NAME: "AMC_TEST"},
     )
 
 
@@ -81,6 +81,7 @@ def fixture_mock_zeroconf_config_entry(
     return MockConfigEntry(
         domain=DOMAIN,
         data={
+            CONF_NAME: "AMC_TEST",
             CONF_MDNS: {
                 CONF_TYPE: "_http._tcp_.local.",
                 CONF_NAME: "AMC_TEST._http._tcp.local.",

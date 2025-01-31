@@ -86,13 +86,10 @@ class AmcrestCameraEntity(CameraEntity, RestoreEntity, CoordinatorEntity):
         )
         if stream_type == StreamType.MAIN:
             self._attr_translation_key = "main_stream"
-            self._attr_name = "main_stream"
-        if stream_type == StreamType.SUBSTREAM1:
+        elif stream_type == StreamType.SUBSTREAM1:
             self._attr_translation_key = "sub_stream_1"
-            self._attr_name = "sub_stream_1"
         elif stream_type == StreamType.SUBSTREAM2:
             self._attr_translation_key = "sub_stream_2"
-            self._attr_name = "sub_stream_2"
         else:
             self._attr_translation_key = "unknown_stream"
 
