@@ -4,13 +4,14 @@ from typing import Any
 from unittest.mock import AsyncMock, patch
 
 from amcrest_api.config import Config as AmcrestFixedConfig
+from amcrest_api.const import StreamType
 from homeassistant.components.zeroconf import ZeroconfServiceInfo
 from homeassistant.config_entries import SOURCE_USER, SOURCE_ZEROCONF
-from homeassistant.const import CONF_PASSWORD, CONF_USERNAME
+from homeassistant.const import CONF_NAME, CONF_PASSWORD, CONF_USERNAME
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 
-from custom_components.amcrest.const import DOMAIN
+from custom_components.amcrest.const import CONF_STREAMS, DOMAIN
 
 
 async def test_config_flow(
@@ -32,12 +33,20 @@ async def test_config_flow(
         )
         assert result["type"] is FlowResultType.FORM
 
+        # input valid configuration
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"],
             user_input_valid_connection,
         )
         await hass.async_block_till_done()
+        assert result["type"] is FlowResultType.FORM
 
+        # configure name and streams
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"],
+            user_input={CONF_NAME: "AMC_TEST", CONF_STREAMS: [str(StreamType.MAIN)]},
+        )
+        await hass.async_block_till_done()
         assert result["type"] is FlowResultType.CREATE_ENTRY
 
         # try to add a second of the same config, and observe config abort
@@ -74,10 +83,19 @@ async def test_zeroconf_flow(
             return_value=mock_fixed_config,
         ),
     ):
+        # configure auth
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"],
             {k: user_input_valid_connection[k] for k in {CONF_USERNAME, CONF_PASSWORD}},
         )
         await hass.async_block_till_done()
+
+        # configure name and streams
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"],
+            user_input={CONF_NAME: "AMC_TEST", CONF_STREAMS: [str(StreamType.MAIN)]},
+        )
+        await hass.async_block_till_done()
+        assert result["type"] is FlowResultType.CREATE_ENTRY
 
         assert result["type"] is FlowResultType.CREATE_ENTRY

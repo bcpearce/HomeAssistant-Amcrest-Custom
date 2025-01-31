@@ -1,8 +1,11 @@
 {
   "config": {
     "error": {
-      "cannot_connect": "[%key:common::config_flow::error::cannot_connect%]",
-      "invalid_auth": "[%key:common::config_flow::error::invalid_auth%]"
+      "already_configured": "A device with the detected Serial Number or MAC Address is already configured.",
+      "cannot_connect": "Failed to connect to the device.",
+      "invalid_auth": "Authentication failed, enter correct username and password.",
+      "name_already_exists": "A device with the provided name already exists.",
+      "no_name_entered": "Must enter a name for the Camera"
     },
     "flow_title": "{camera_discovered_name}",
     "step": {
@@ -20,6 +23,17 @@
           "username": "Your username for the Amcrest camera. It is recommended to create new user credentials for the HomeAssistant integration."
         },
         "description": "Setup Amcrest Camera {target_device}"
+      },
+      "verify_and_name": {
+        "data": {
+          "name": "Camera Name",
+          "streams": "Streams"
+        },
+        "data_description": {
+          "name": "Provide a name for your camera.",
+          "streams": "Select the streams to include in the integration."
+        },
+        "description": "Adding {serial_number}, provide a device name and verify the streams."
       }
     }
   },

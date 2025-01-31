@@ -1,21 +1,4 @@
 repos:
-  - repo: local
-    hooks:
-      - id: check_version
-        name: check_version
-        language: system
-        entry: python hooks/check_version.py
-        files: ^(custom_components/.+/manifest\.json|pyproject.\toml|poetry\.lock)$
-      - id: hassfest
-        name: hassfest
-        language: system
-        entry: sh hooks/hassfest.sh
-        files: ^(custom_components/.+/(icons|manifest|strings)\.json|custom_components/.+/translations/.+\.json|custom_components/.+/(quality_scale)\.yaml|custom_components/brands/.*\.json|custom_components/.+/services\.yaml|script/hassfest/(?!metadata|mypy_config).+\.py|requirements.+\.txt)$
-      - id: pytest
-        name: pytest
-        language: system
-        entry: sh hooks/runtests.sh
-        files: ^(custom_components/.*\.py|tests/.*\.py)$
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
@@ -47,3 +30,20 @@ repos:
     hooks:
     - id: codespell
       exclude: "^tests/fixtures/mock_responses"
+  - repo: local
+    hooks:
+      - id: check_version
+        name: check_version
+        language: system
+        entry: python hooks/check_version.py
+        files: ^(custom_components/.+/manifest\.json|pyproject.\toml|uv\.lock)$
+      - id: hassfest
+        name: hassfest
+        language: system
+        entry: sh hooks/hassfest.sh
+        files: ^(custom_components/.+/(icons|manifest|strings)\.json|custom_components/.+/translations/.+\.json|custom_components/.+/(quality_scale)\.yaml|custom_components/brands/.*\.json|custom_components/.+/services\.yaml|script/hassfest/(?!metadata|mypy_config).+\.py|requirements.+\.txt)$
+      - id: pytest
+        name: pytest
+        language: system
+        entry: sh hooks/runtests.sh
+        files: ^(custom_components/.*\.py|tests/.*\.py)$

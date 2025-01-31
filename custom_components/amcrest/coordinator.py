@@ -10,6 +10,7 @@ from typing import Any
 from amcrest_api.camera import Camera as AmcrestApiCamera
 from amcrest_api.config import Config as AmcrestFixedConfig
 from amcrest_api.event import EventMessageType, VideoMotionEvent
+from homeassistant.const import CONF_NAME
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.device_registry import CONNECTION_NETWORK_MAC, DeviceInfo
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
@@ -21,7 +22,7 @@ _LOGGER: Logger = getLogger(__package__)
 
 PARALLEL_UPDATES = 0
 
-DEFAULT_UPDATE_INTERVAL = timedelta(seconds=30)
+DEFAULT_UPDATE_INTERVAL = timedelta(seconds=120)
 
 
 class AmcrestDataCoordinator(DataUpdateCoordinator):
@@ -161,6 +162,6 @@ class AmcrestDataCoordinator(DataUpdateCoordinator):
             },
             manufacturer=MANUFACTURER,
             sw_version=self.fixed_config.software_version,
-            name=self.fixed_config.machine_name,
+            name=self.config_entry.data[CONF_NAME],
             serial_number=self.fixed_config.serial_number,
         )

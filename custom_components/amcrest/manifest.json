@@ -12,9 +12,9 @@
     "amcrest"
   ],
   "requirements": [
-    "amcrest_api==0.1.0a2"
+    "amcrest_api==0.1.0a3"
   ],
-  "version": "0.1.0",
+  "version": "0.2.0",
   "zeroconf": [
     {
       "properties": {
@@ -36,7 +36,7 @@
     },
     {
       "properties": {
-        "mac": "a0:60:32:*"
+        "mac": "34:46:63:2*"
       },
       "type": "_http._tcp.local."
     }

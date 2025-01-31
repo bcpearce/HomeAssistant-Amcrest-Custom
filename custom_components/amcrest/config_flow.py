@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Any
 import voluptuous as vol
 import yarl
 from amcrest_api.camera import Camera as AmcrestApiCamera
+from amcrest_api.const import StreamType
 from homeassistant.components.zeroconf import ZeroconfServiceInfo
 from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
 from homeassistant.const import (
@@ -20,6 +21,10 @@ from homeassistant.const import (
 )
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.selector import (
+    SelectOptionDict,
+    SelectSelector,
+    SelectSelectorConfig,
+    SelectSelectorMode,
     TextSelector,
     TextSelectorConfig,
     TextSelectorType,
@@ -27,7 +32,7 @@ from homeassistant.helpers.selector import (
 from homeassistant.util import ssl as hass_ssl
 from httpx import HTTPStatusError
 
-from .const import CONF_MDNS, DOMAIN
+from .const import CONF_MDNS, CONF_STREAMS, DOMAIN
 
 if TYPE_CHECKING:
     from amcrest_api.config import Config as AmcrestFixedConfig
@@ -82,23 +87,25 @@ class AmcrestConfigFlow(ConfigFlow, domain=DOMAIN):
                     await self._camera_api.async_get_fixed_config()
                 )
 
-                await self.async_set_unique_id(config.session_physical_address)
+                await self.async_set_unique_id(config.serial_number)
                 self._abort_if_unique_id_configured(
                     updates={
-                        ATTR_SERIAL_NUMBER: config.serial_number,
+                        CONF_HOST: config.serial_number,
                         CONF_MAC: config.session_physical_address,
                     }
                 )
 
+                self._config[CONF_NAME] = config.machine_name
                 self._config[ATTR_SERIAL_NUMBER] = config.serial_number
                 self._config[CONF_UNIQUE_ID] = config.serial_number
                 self._config[CONF_MAC] = config.session_physical_address
+
                 # Successfully connected, merge the user input to the config
                 self._config[CONF_PASSWORD] = user_input[CONF_PASSWORD]
                 self._config[CONF_USERNAME] = user_input[CONF_USERNAME]
-                return self.async_create_entry(
-                    title=self._config[ATTR_SERIAL_NUMBER], data=self._config
-                )
+
+                return await self.async_step_verify_and_name()
+
             except HTTPStatusError as e:
                 errors[CONF_USERNAME] = e.response.text
 
@@ -131,16 +138,73 @@ class AmcrestConfigFlow(ConfigFlow, domain=DOMAIN):
             description_placeholders=description_placeholders,
         )
 
+    async def async_step_verify_and_name(
+        self,
+        user_input: dict[str, Any] | None = None,
+    ) -> ConfigFlowResult:
+        """Verify streams and name."""
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            # Verify name does not clash
+            input_name = user_input[CONF_NAME]
+            if not input_name:
+                errors[CONF_NAME] = "no_name_entered"
+            else:
+                domain_entries = self.hass.config_entries.async_entries(DOMAIN)
+                if input_name in [e.data[CONF_NAME] for e in domain_entries]:
+                    errors[CONF_NAME] = "name_already_exists"
+
+            streams = [int(x) for x in user_input[CONF_STREAMS]]
+            assert all(x in StreamType for x in streams)
+            self._config[CONF_STREAMS] = streams
+
+            if not errors:
+                self._config[CONF_NAME] = input_name
+                return self.async_create_entry(
+                    title=self._config[CONF_NAME], data=self._config
+                )
+
+        options = {
+            str(v): str(k)
+            for k, v in (
+                await self._camera_api.async_get_fixed_config()
+            ).supported_streams.items()
+        }
+
+        return self.async_show_form(
+            step_id="verify_and_name",
+            data_schema=vol.Schema(
+                {
+                    vol.Required(CONF_NAME, default=self._config[CONF_NAME]): cv.string,
+                    vol.Required(
+                        CONF_STREAMS, default=list(options.values())
+                    ): SelectSelector(
+                        SelectSelectorConfig(
+                            options=[
+                                SelectOptionDict(value=v, label=k)
+                                for k, v in options.items()
+                            ],
+                            mode=SelectSelectorMode.LIST,
+                            multiple=True,
+                        )
+                    ),
+                }
+            ),
+            description_placeholders={"serial_number": self._config[CONF_UNIQUE_ID]},
+            errors=errors,
+        )
+
     async def async_step_zeroconf(
         self, discovery_info: ZeroconfServiceInfo
     ) -> ConfigFlowResult:
         """Handle discovery via Zeroconf."""
         mac = discovery_info.properties[CONF_MAC]
+        serial_number = discovery_info.properties[CONF_HOST]
 
-        await self.async_set_unique_id(mac)
+        await self.async_set_unique_id(serial_number)
         self._abort_if_unique_id_configured(
             updates={
-                CONF_HOST: discovery_info.host,
+                CONF_HOST: serial_number,
                 CONF_MAC: mac,
             }
         )

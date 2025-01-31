@@ -8,6 +8,7 @@ MANUFACTURER: Final = "Amcrest"
 
 DEFAULT_PORT_HTTP = 80
 CONF_MDNS: Final = "mdns"
+CONF_STREAMS: Final = "streams"
 
 
 class PtzAxes(StrEnum):
