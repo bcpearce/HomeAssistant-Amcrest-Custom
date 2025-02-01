@@ -36,7 +36,7 @@ repos:
         name: check_version
         language: system
         entry: python hooks/check_version.py
-        files: ^(custom_components/.+/manifest\.json|pyproject.\toml|uv\.lock)$
+        files: ^(custom_components/.+/manifest\.json|pyproject\.toml|uv\.lock)$
       - id: hassfest
         name: hassfest
         language: system

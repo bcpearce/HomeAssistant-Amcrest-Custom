@@ -77,3 +77,23 @@ zoom:
     speed: *speed
     continuous_duration_seconds: *continuous_duration_seconds
     move_mode: *move_mode
+
+update_ptz_preset:
+  fields:
+    device_id: *device_id
+    preset_id: &preset_id
+      required: true
+      selector:
+        number:
+          min: 1
+          max: 25
+          step: 1
+    preset_name:
+      required: false
+      selector:
+        text:
+
+remove_ptz_preset:
+  fields:
+    device_id: *device_id
+    preset_id: *preset_id
