@@ -7,9 +7,9 @@ from homeassistant.components.switch import SwitchDeviceClass, SwitchEntity
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from . import AmcrestConfigEntry, AmcrestDataCoordinator
+from .entity import AmcrestEntity
 
 PARALLEL_UPDATES = 0
 
@@ -40,7 +40,7 @@ def _async_get_device_id(entity: Entity) -> str:
     return device_entry.id
 
 
-class AmcrestPrivacyModeSwitch(CoordinatorEntity[AmcrestDataCoordinator], SwitchEntity):
+class AmcrestPrivacyModeSwitch(AmcrestEntity, SwitchEntity):
     """Privacy Mode Switch. Implement Camera On/Off."""
 
     _attr_has_entity_name = True
@@ -51,7 +51,6 @@ class AmcrestPrivacyModeSwitch(CoordinatorEntity[AmcrestDataCoordinator], Switch
         """Initialize the switch."""
         super().__init__(coordinator=coordinator)
         self._attr_unique_id = f"{coordinator.fixed_config.serial_number}-privacy_mode"
-        self._attr_device_info: dr.DeviceInfo = coordinator.device_info
         self._attr_is_on = self.coordinator.amcrest_data.privacy_mode_on
 
     async def _handle_privacy_mode(self, is_on: bool) -> None:
@@ -75,9 +74,7 @@ class AmcrestPrivacyModeSwitch(CoordinatorEntity[AmcrestDataCoordinator], Switch
         self.async_write_ha_state()
 
 
-class AmcrestPtzSmartTrackSwitch(
-    CoordinatorEntity[AmcrestDataCoordinator], SwitchEntity
-):
+class AmcrestPtzSmartTrackSwitch(AmcrestEntity, SwitchEntity):
     """Smart Track Switch. Automatically tracks detected motion."""
 
     _attr_has_entity_name = True
@@ -88,7 +85,6 @@ class AmcrestPtzSmartTrackSwitch(
         """Initialize the switch."""
         super().__init__(coordinator=coordinator)
         self._attr_unique_id = f"{coordinator.fixed_config.serial_number}-smart_track"
-        self._attr_device_info = coordinator.device_info
         self._attr_is_on = coordinator.amcrest_data.smart_track_on
 
     async def _handle_smart_track(self, turn_on: bool) -> None:

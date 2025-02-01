@@ -107,7 +107,7 @@ async def test_ptz_service_call(
     assert entry is not None
 
     coordinator: AmcrestDataCoordinator = entry.runtime_data
-    device = dr.async_get(hass).async_get_device(coordinator.device_info["identifiers"])
+    device = dr.async_get(hass).async_get_device(coordinator.identifiers)
     with patch.object(
         coordinator.api,
         "async_ptz_move_relative",
@@ -159,7 +159,7 @@ async def test_ptz_preset_name_service_call(
     assert entry is not None
 
     coordinator: AmcrestDataCoordinator = entry.runtime_data
-    device = dr.async_get(hass).async_get_device(coordinator.device_info["identifiers"])
+    device = dr.async_get(hass).async_get_device(coordinator.identifiers)
 
     preset_to_set = PtzPresetData(1, "TestPreset")
     with (

@@ -11,7 +11,8 @@ from homeassistant.components.camera import Camera as CameraEntity
 from homeassistant.components.camera import CameraEntityFeature
 from homeassistant.core import callback
 from homeassistant.helpers.restore_state import ExtraStoredData, RestoreEntity
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
+
+from .entity import AmcrestEntity
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
@@ -52,7 +53,7 @@ class AmcrestCameraExtraStoredData(ExtraStoredData):
         return {"motion_detection_enabled": self.motion_detection_enabled}
 
 
-class AmcrestCameraEntity(CameraEntity, RestoreEntity, CoordinatorEntity):
+class AmcrestCameraEntity(CameraEntity, RestoreEntity, AmcrestEntity):
     """Amcrest IP camera entity."""
 
     _attr_is_on = True
@@ -70,10 +71,9 @@ class AmcrestCameraEntity(CameraEntity, RestoreEntity, CoordinatorEntity):
     ) -> None:
         """Initialize the Amcrest camera entity."""
         super().__init__()
-        super(CoordinatorEntity, self).__init__(coordinator=coordinator)
+        super(AmcrestEntity, self).__init__(coordinator=coordinator)
         self._attr_is_on = not self.coordinator.amcrest_data.privacy_mode_on
         self._attr_is_streaming = not self.coordinator.amcrest_data.privacy_mode_on
-        self._attr_device_info = coordinator.device_info
         self._attr_can_pan = coordinator.fixed_config.ptz_capabilities.pan
         self._attr_can_tilt = coordinator.fixed_config.ptz_capabilities.tilt
         self._attr_can_zoom = coordinator.fixed_config.ptz_capabilities.zoom

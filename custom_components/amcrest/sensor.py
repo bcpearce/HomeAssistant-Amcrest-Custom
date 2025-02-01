@@ -7,10 +7,10 @@ from homeassistant.components.sensor import (
 )
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from . import AmcrestConfigEntry
 from .coordinator import AmcrestDataCoordinator
+from .entity import AmcrestEntity
 
 DESCRIPTIONS = {
     "position_pan": SensorEntityDescription(
@@ -56,7 +56,7 @@ async def async_setup_entry(
     )
 
 
-class AmcrestPtzSensor(CoordinatorEntity[AmcrestDataCoordinator], SensorEntity):
+class AmcrestPtzSensor(AmcrestEntity, SensorEntity):
     """Amcrest PTZ position sensor."""
 
     _attr_has_entity_name = True
@@ -70,7 +70,6 @@ class AmcrestPtzSensor(CoordinatorEntity[AmcrestDataCoordinator], SensorEntity):
         self._attr_unique_id = (
             f"{coordinator.fixed_config.serial_number}-f{self.entity_description.key}"
         )
-        self._attr_device_info = coordinator.device_info
 
     @callback
     def _handle_coordinator_update(self) -> None:
