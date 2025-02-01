@@ -3,8 +3,14 @@
     "pan": {
       "service": "mdi:pan-horizontal"
     },
+    "remove_ptz_preset": {
+      "service": "mdi:delete-forever"
+    },
     "tilt": {
       "service": "mdi:pan-vertical"
+    },
+    "update_ptz_preset": {
+      "service": "mdi:cog"
     },
     "zoom": {
       "service": "mdi:magnify-plus"

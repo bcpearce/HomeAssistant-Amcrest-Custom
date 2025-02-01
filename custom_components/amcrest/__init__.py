@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any
 
 import yarl
 from amcrest_api.camera import Camera as AmcrestApiCamera
-from amcrest_api.ptz import PtzBasicMove, PtzRelativeMove
+from amcrest_api.ptz import PtzBasicMove, PtzPresetData, PtzRelativeMove
 from homeassistant.components import zeroconf
 from homeassistant.components.zeroconf import IPVersion
 from homeassistant.config_entries import ConfigEntry
@@ -48,9 +48,18 @@ SERIVCE_TILT_DIRECTION = "tilt_direction"
 _ZOOM = "zoom"
 _ZOOM_DIRECTION = "zoom_direction"
 
+SERVICE_UPDATE_PTZ_PRESET = "update_ptz_preset"
+SERVICE_CLEAR_PTZ_PRESET = "remove_ptz_preset"
+SERVICE_PRESET_ID = "preset_id"
+SERVICE_PRESET_NAME = "preset_name"
 
-async def async_handle_ptz(call: ServiceCall) -> None:
-    """Handle PTZ service calls."""
+CONFIG_SCHEMA = cv.empty_config_schema(DOMAIN)
+
+
+def async_coordinator_from_service_call(
+    call: ServiceCall,
+) -> AmcrestDataCoordinator:
+    """Get the coordinator from a call with a device ID."""
     registry = dr.async_get(call.hass)
     entry_id = registry.async_get(call.data["device_id"]).primary_config_entry
     if entry_id is None:
@@ -62,7 +71,12 @@ async def async_handle_ptz(call: ServiceCall) -> None:
     coordinator: AmcrestDataCoordinator = call.hass.config_entries.async_get_entry(
         entry_id
     ).runtime_data
+    return coordinator
 
+
+async def async_handle_ptz(call: ServiceCall) -> None:
+    """Handle PTZ service calls."""
+    coordinator = async_coordinator_from_service_call(call)
     if call.data.get("move_mode") == "relative":
         move = PtzRelativeMove()
         if (direction := call.data.get(SERVICE_PAN_DIRECTION)) is not None:
@@ -90,7 +104,23 @@ async def async_handle_ptz(call: ServiceCall) -> None:
     await coordinator.async_request_refresh()
 
 
-CONFIG_SCHEMA = cv.empty_config_schema(DOMAIN)
+async def async_handle_update_ptz_preset(call: ServiceCall) -> None:
+    """Handles saving a new PTZ preset, or updating an existing one."""
+    coordinator = async_coordinator_from_service_call(call)
+    index = int(call.data[SERVICE_PRESET_ID])
+    preset = PtzPresetData(
+        index=index, name=call.data.get(SERVICE_PRESET_NAME, f"Preset{index}")
+    )
+    await coordinator.api.async_set_ptz_preset(preset)
+    await coordinator.async_request_refresh()
+
+
+async def async_handle_clear_ptz_preset(call: ServiceCall) -> None:
+    """Handles clearing a PTZ preset."""
+    coordinator = async_coordinator_from_service_call(call)
+    index = int(call.data[SERVICE_PRESET_ID])
+    await coordinator.api.async_clear_ptz_preset(index)
+    await coordinator.async_request_refresh()
 
 
 # pylint: disable=unused-argument
@@ -98,6 +128,12 @@ async def async_setup(hass: HomeAssistant, config: Any) -> bool:
     """Set up the integration."""
     hass.services.async_register(DOMAIN, SERVICE_PAN, async_handle_ptz)
     hass.services.async_register(DOMAIN, SERVICE_TILT, async_handle_ptz)
+    hass.services.async_register(
+        DOMAIN, SERVICE_UPDATE_PTZ_PRESET, async_handle_update_ptz_preset
+    )
+    hass.services.async_register(
+        DOMAIN, SERVICE_CLEAR_PTZ_PRESET, async_handle_clear_ptz_preset
+    )
     return True
 
 

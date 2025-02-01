@@ -149,6 +149,20 @@
         }
       }
     },
+    "remove_ptz_preset": {
+      "name": "Remove Preset",
+      "description": "Clear PTZ preset registered to a given index.",
+      "fields": {
+        "device_id": {
+          "name": "Device",
+          "description": "Device to target the move."
+        },
+        "preset_id": {
+          "name": "Preset ID",
+          "description": "The ID of the preset, starting from 1"
+        }
+      }
+    },
     "tilt": {
       "name": "Tilt",
       "description": "Tilt the camera up or down.",
@@ -176,6 +190,24 @@
         "tilt_direction": {
           "name": "Tilt Direction",
           "description": "Direction to tilt the camera."
+        }
+      }
+    },
+    "update_ptz_preset": {
+      "name": "Update Preset",
+      "description": "Update or add a PTZ preset at the current camera position.",
+      "fields": {
+        "device_id": {
+          "name": "Device",
+          "description": "Device to target the move."
+        },
+        "preset_id": {
+          "name": "Preset ID",
+          "description": "The ID of the preset, starting from 1"
+        },
+        "preset_name": {
+          "name": "Preset Name",
+          "description": "A name to give the preset."
         }
       }
     },
