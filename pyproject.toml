@@ -9,7 +9,7 @@ packages = []
 name="homeassistant-amcrest-custom"
 description="Custom Amcrest integration for Home Assistant to replace the default."
 readme = "README.md"
-version = "0.2.1"
+version = "0.2.2"
 requires-python = ">=3.13,<3.14"
 dependencies = [
     "amcrest_api>=0.1.0a4",
@@ -81,9 +81,3 @@ testpaths = "tests"
 
 [tool.coverage.run]
 omit = ["amcrest_api/__main__.py"]
-
-[tool.uv.sources]
-amcrest_api = {workspace = true}
-
-[tool.uv.workspace]
-members = ["../amcrest-api"]

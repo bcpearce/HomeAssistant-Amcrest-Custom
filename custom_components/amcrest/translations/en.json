@@ -69,6 +69,12 @@
       "position_zoom": {
         "name": "Zoom"
       },
+      "sd_card_total_capacity": {
+        "name": "SD Card Total Capacity"
+      },
+      "sd_card_used_capacity": {
+        "name": "SD Card Used Capacity"
+      },
       "url": {
         "name": "URL"
       }

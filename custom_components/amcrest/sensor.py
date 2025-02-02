@@ -4,13 +4,12 @@ from collections.abc import Callable
 from dataclasses import dataclass
 
 from homeassistant.components.sensor import (
+    SensorDeviceClass,
     SensorEntity,
     SensorEntityDescription,
     SensorStateClass,
 )
-from homeassistant.const import (
-    EntityCategory,
-)
+from homeassistant.const import EntityCategory, UnitOfInformation
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import StateType
@@ -62,8 +61,37 @@ DESCRIPTIONS: tuple[AmcrestSensorEntityDescription, ...] = (
     AmcrestSensorEntityDescription(
         key="url",
         translation_key="url",
+        icon="mdi:link",
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda coordinator: str(coordinator.api.url),
+    ),
+    AmcrestSensorEntityDescription(
+        key="sd_card_total_capacity",
+        translation_key="sd_card_total_capacity",
+        icon="mdi:micro-sd",
+        device_class=SensorDeviceClass.DATA_SIZE,
+        state_class=SensorStateClass.MEASUREMENT,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        native_unit_of_measurement=UnitOfInformation.BYTES,
+        suggested_unit_of_measurement=UnitOfInformation.GIGABYTES,
+        exists_fn=lambda coordinator: len(coordinator.amcrest_data.storage_info) > 0,
+        value_fn=lambda coordinator: coordinator.amcrest_data.storage_info[
+            0
+        ].total_bytes,
+    ),
+    AmcrestSensorEntityDescription(
+        key="sd_card_used_capacity",
+        translation_key="sd_card_used_capacity",
+        icon="mdi:micro-sd",
+        device_class=SensorDeviceClass.DATA_SIZE,
+        state_class=SensorStateClass.MEASUREMENT,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        native_unit_of_measurement=UnitOfInformation.BYTES,
+        suggested_unit_of_measurement=UnitOfInformation.GIGABYTES,
+        exists_fn=lambda coordinator: len(coordinator.amcrest_data.storage_info) > 0,
+        value_fn=lambda coordinator: coordinator.amcrest_data.storage_info[
+            0
+        ].used_bytes,
     ),
 )
 

@@ -5,6 +5,7 @@ from typing import Any
 
 from amcrest_api.event import VideoMotionEvent
 from amcrest_api.ptz import PtzPresetData, PtzStatusData
+from amcrest_api.storage import StorageDeviceInfo
 
 
 @dataclass
@@ -17,3 +18,4 @@ class AmcrestData:
     smart_track_on: bool | None = None
     lighting: Any | None = None  # LightingConfigData
     ptz_status: PtzStatusData | None = None
+    storage_info: list[StorageDeviceInfo] = field(default_factory=list)

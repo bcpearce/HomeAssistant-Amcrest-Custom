@@ -28,4 +28,6 @@ class AmcrestEntity(CoordinatorEntity[AmcrestDataCoordinator]):
             sw_version=self.coordinator.fixed_config.software_version,
             name=self.coordinator.config_entry.data[CONF_NAME],
             serial_number=self.coordinator.fixed_config.serial_number,
+            model=self.coordinator.fixed_config.device_type,
+            hw_version=self.coordinator.fixed_config.hardware_version,
         )

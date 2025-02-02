@@ -60,6 +60,7 @@ class AmcrestDataCoordinator(DataUpdateCoordinator):
             "lighting",
             "ptz_status",
             "smart_track_on",
+            "storage_info",
         ]
 
         tasks = [
@@ -68,6 +69,7 @@ class AmcrestDataCoordinator(DataUpdateCoordinator):
             asyncio.create_task(self.api.async_lighting_config),
             asyncio.create_task(self.api.async_ptz_status),
             asyncio.create_task(self.api.async_get_smart_track_on()),
+            asyncio.create_task(self.api.async_storage_info),
         ]
 
         results = await asyncio.gather(*tasks)
