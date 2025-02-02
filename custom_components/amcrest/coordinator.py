@@ -12,10 +12,10 @@ from amcrest_api.config import Config as AmcrestFixedConfig
 from amcrest_api.event import EventMessageType, VideoMotionEvent
 from homeassistant.const import CONF_NAME
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.device_registry import CONNECTION_NETWORK_MAC, DeviceInfo
+from homeassistant.helpers.device_registry import CONNECTION_NETWORK_MAC
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
-from .const import DOMAIN, MANUFACTURER
+from .const import DOMAIN
 from .data import AmcrestData
 
 _LOGGER: Logger = getLogger(__package__)
@@ -32,6 +32,7 @@ class AmcrestDataCoordinator(DataUpdateCoordinator):
     _should_listen_for_events: bool = False
     amcrest_data: AmcrestData
     fixed_config: AmcrestFixedConfig
+    api: AmcrestApiCamera
     data: dict[str, Any]
 
     def __init__(self, hass: HomeAssistant, api: AmcrestApiCamera) -> None:
@@ -59,6 +60,7 @@ class AmcrestDataCoordinator(DataUpdateCoordinator):
             "lighting",
             "ptz_status",
             "smart_track_on",
+            "storage_info",
         ]
 
         tasks = [
@@ -67,6 +69,7 @@ class AmcrestDataCoordinator(DataUpdateCoordinator):
             asyncio.create_task(self.api.async_lighting_config),
             asyncio.create_task(self.api.async_ptz_status),
             asyncio.create_task(self.api.async_get_smart_track_on()),
+            asyncio.create_task(self.api.async_storage_info),
         ]
 
         results = await asyncio.gather(*tasks)
@@ -94,7 +97,7 @@ class AmcrestDataCoordinator(DataUpdateCoordinator):
             self._event_listener_task = self.config_entry.async_create_background_task(
                 self.hass,
                 self.async_listen_for_camera_events(),
-                f"amcrest {self.device_info['name']}",
+                f"amcrest {self.data.get(CONF_NAME)}",
             )
             self._should_listen_for_events = True
         self.async_update_listeners()
@@ -116,7 +119,7 @@ class AmcrestDataCoordinator(DataUpdateCoordinator):
         try:
             _LOGGER.debug(
                 "Begin listening for motion events on device %s",
-                self.device_info["name"],
+                self.data.get(CONF_NAME),
             )
             async for event in self.api.async_listen_events(
                 heartbeat_seconds=30, filter_events=[EventMessageType.VideoMotion]
@@ -128,16 +131,16 @@ class AmcrestDataCoordinator(DataUpdateCoordinator):
         except Exception as e:
             _LOGGER.error(
                 "An exception occurred on event listener for device %s: %s",
-                self.device_info["name"],
+                self.data.get(CONF_NAME),
                 e,
             )
         except asyncio.CancelledError:
             _LOGGER.info(
-                "Event listener for device %s cancelled", self.device_info["name"]
+                "Event listener for device %s cancelled", self.data.get(CONF_NAME)
             )
         finally:
             _LOGGER.debug(
-                "Finished listening for motion events %s", self.device_info["name"]
+                "Finished listening for motion events %s", self.data.get(CONF_NAME)
             )
 
     @property
@@ -150,18 +153,14 @@ class AmcrestDataCoordinator(DataUpdateCoordinator):
         )
 
     @property
-    def device_info(self) -> DeviceInfo:
-        """Device info for any entity using this coordinator."""
-        return DeviceInfo(
-            identifiers={(DOMAIN, str(self.fixed_config.serial_number))},
-            connections={
-                (
-                    CONNECTION_NETWORK_MAC,
-                    self.fixed_config.session_physical_address,
-                )
-            },
-            manufacturer=MANUFACTURER,
-            sw_version=self.fixed_config.software_version,
-            name=self.config_entry.data[CONF_NAME],
-            serial_number=self.fixed_config.serial_number,
-        )
+    def identifiers(self) -> set[tuple[str, str]]:
+        return {(DOMAIN, str(self.fixed_config.serial_number))}
+
+    @property
+    def connections(self) -> set[tuple[str, str]]:
+        return {
+            (
+                CONNECTION_NETWORK_MAC,
+                self.fixed_config.session_physical_address,
+            )
+        }

@@ -8,6 +8,8 @@ from custom_components.amcrest.data import AmcrestData
 
 MOCK_FIXED_CONFIG = AmcrestFixedConfig(
     machine_name="AMC_TEST",
+    device_type="AMC_TEST_DEV",
+    hardware_version="1.00",
     network={},
     ptz_capabilities=PtzCapabilityData(preset=True),
     serial_number="123456",

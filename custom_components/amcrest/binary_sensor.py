@@ -10,14 +10,14 @@ from homeassistant.components.binary_sensor import (
     BinarySensorEntity,
 )
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .coordinator import AmcrestDataCoordinator
+from .entity import AmcrestEntity
 
 if TYPE_CHECKING:
     from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
     from . import AmcrestConfigEntry
+    from .coordinator import AmcrestDataCoordinator
 
 
 # pylint: disable=unused-argument
@@ -32,9 +32,7 @@ async def async_setup_entry(
     async_add_entities([AmcrestVideoMotionSensor(coordinator)])
 
 
-class AmcrestVideoMotionSensor(
-    CoordinatorEntity[AmcrestDataCoordinator], BinarySensorEntity
-):
+class AmcrestVideoMotionSensor(AmcrestEntity, BinarySensorEntity):
     """Binary sensor for Amcrest camera."""
 
     _attr_has_entity_name = True
@@ -45,7 +43,6 @@ class AmcrestVideoMotionSensor(
         """Initialize entity."""
         super().__init__(coordinator=coordinator)
         self._attr_unique_id = f"{coordinator.fixed_config.serial_number}-motion_sensor"
-        self._attr_device_info = coordinator.device_info
 
     @callback
     def _handle_coordinator_update(self) -> None:

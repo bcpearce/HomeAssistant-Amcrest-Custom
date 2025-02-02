@@ -3,10 +3,10 @@
 from homeassistant.components.select import SelectEntity
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from . import AmcrestConfigEntry
 from .coordinator import AmcrestDataCoordinator
+from .entity import AmcrestEntity
 
 
 async def async_setup_entry(
@@ -20,7 +20,7 @@ async def async_setup_entry(
         async_add_entities([PtzPresetSelectEntity(coordinator=entry.runtime_data)])
 
 
-class PtzPresetSelectEntity(CoordinatorEntity[AmcrestDataCoordinator], SelectEntity):
+class PtzPresetSelectEntity(AmcrestEntity, SelectEntity):
     """Selector for PTZ presets."""
 
     _attr_has_entity_name = True
@@ -34,7 +34,6 @@ class PtzPresetSelectEntity(CoordinatorEntity[AmcrestDataCoordinator], SelectEnt
         ]
         self._attr_current_option = None
         self._attr_unique_id = coordinator.fixed_config.serial_number
-        self._attr_device_info = coordinator.device_info
 
     async def async_select_option(self, option: str) -> None:
         """Select preset by name."""

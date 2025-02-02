@@ -26,7 +26,7 @@ default:
       - $PRE_COMMIT_HOME
   before_script:
     - python --version ; pip --version ; uv --version
-    - uv sync --all-groups --prerelease=allow
+    - uv sync --all-groups --prerelease=allow --refresh-package amcrest_api
     - source .venv/bin/activate
   after_script:
     - uv cache prune --ci
