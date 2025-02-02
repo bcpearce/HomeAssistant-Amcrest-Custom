@@ -68,6 +68,9 @@
       },
       "position_zoom": {
         "name": "Zoom"
+      },
+      "url": {
+        "name": "URL"
       }
     },
     "switch": {

@@ -32,6 +32,7 @@ class AmcrestDataCoordinator(DataUpdateCoordinator):
     _should_listen_for_events: bool = False
     amcrest_data: AmcrestData
     fixed_config: AmcrestFixedConfig
+    api: AmcrestApiCamera
     data: dict[str, Any]
 
     def __init__(self, hass: HomeAssistant, api: AmcrestApiCamera) -> None:
