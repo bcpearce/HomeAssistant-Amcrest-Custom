@@ -17,3 +17,12 @@ class PtzAxes(StrEnum):
     PAN = "pan"
     TILT = "tilt"
     ZOOM = "zoom"
+
+
+class RotationOption(StrEnum):
+    """Possible rotation options."""
+
+    NONE = "none"
+    CLOCKWISE_90 = "clockwise_90"
+    FLIP_180 = "flip_180"
+    CLOCKWISE_270 = "clockwise_270"

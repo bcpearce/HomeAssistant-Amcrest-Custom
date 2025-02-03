@@ -18,6 +18,12 @@ The easiest way to install is to add the repository as a custom repository to HA
 
 Copy the contents of `custom_components/amcrest` into the `config/custom_components` of your Home Assistant integration. Once installed, restart Home Assistant to enable.
 
+## Why replace the default integration?
+
+The default integration is considered "legacy". It has not been updated recently and only supports setup through YAML.
+
+This project modernizes the setup to allow configuration through the GUI and autodetection on the network.  Features for the camera are automatically determined by polling the camera capabilities and creating the relevant entities.
+
 ## Setup
 
 ### Zeroconf

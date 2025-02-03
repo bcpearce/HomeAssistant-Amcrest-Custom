@@ -57,6 +57,15 @@
     "select": {
       "ptz_preset": {
         "name": "PTZ Preset"
+      },
+      "video_image_control": {
+        "name": "Video Image Control",
+        "state": {
+          "clockwise_270": "Clockwise 270\u00b0",
+          "clockwise_90": "Clockwise 90\u00b0",
+          "flip_180": "Flip 180\u00b0",
+          "none": "None"
+        }
       }
     },
     "sensor": {

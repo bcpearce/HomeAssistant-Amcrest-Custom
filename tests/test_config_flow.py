@@ -61,6 +61,8 @@ async def test_config_flow(
         )
         assert result["type"] is FlowResultType.ABORT
 
+        await hass.async_block_till_done()
+
 
 async def test_zeroconf_flow(
     hass: HomeAssistant,
