@@ -59,9 +59,8 @@ async def test_config_flow(
             result["flow_id"],
             user_input_valid_connection,
         )
-        assert result["type"] is FlowResultType.ABORT
-
         await hass.async_block_till_done()
+        assert result["type"] is FlowResultType.ABORT
 
 
 async def test_zeroconf_flow(

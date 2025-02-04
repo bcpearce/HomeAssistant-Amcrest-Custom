@@ -62,6 +62,7 @@ class AmcrestDataCoordinator(DataUpdateCoordinator):
             "smart_track_on",
             "storage_info",
             "video_image_control",
+            "video_input_day_night",
         ]
 
         tasks = [
@@ -72,6 +73,7 @@ class AmcrestDataCoordinator(DataUpdateCoordinator):
             asyncio.create_task(self.api.async_get_smart_track_on()),
             asyncio.create_task(self.api.async_storage_info),
             asyncio.create_task(self.api.async_video_image_control),
+            asyncio.create_task(self.api.async_get_video_in_day_night()),
         ]
 
         results = await asyncio.gather(*tasks)

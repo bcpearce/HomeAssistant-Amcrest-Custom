@@ -66,6 +66,9 @@
           "flip_180": "Flip 180\u00b0",
           "none": "None"
         }
+      },
+      "video_input_day_night": {
+        "name": "Video Input Day/Night {config_desc}"
       }
     },
     "sensor": {

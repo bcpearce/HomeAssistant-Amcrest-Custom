@@ -1,4 +1,16 @@
 {
+  "entity": {
+    "select": {
+      "video_input_day_night": {
+        "state": {
+          "black_white": "mdi:weather-night",
+          "brightness": "mdi:brightness-auto",
+          "color": "mdi:weather-sunny",
+          "photoresistor": "mdi:resistor"
+        }
+      }
+    }
+  },
   "services": {
     "pan": {
       "service": "mdi:pan-horizontal"
