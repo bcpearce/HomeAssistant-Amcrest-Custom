@@ -3,11 +3,11 @@
 from amcrest_api.config import Config as AmcrestFixedConfig
 from amcrest_api.const import StreamType, StreamTypeName
 from amcrest_api.imaging import (
+    Sensitivity,
     VideoDayNight,
     VideoDayNightType,
     VideoImageControl,
     VideoMode,
-    VideoSensitivity,
 )
 from amcrest_api.ptz import PtzCapabilityData, PtzPresetData
 
@@ -37,19 +37,19 @@ MOCK_DATA_UPDATE = AmcrestData(
         [
             VideoDayNight(
                 delay_seconds=2,
-                sensitivity=VideoSensitivity.MEDIUM,
+                sensitivity=Sensitivity.MEDIUM,
                 mode=VideoMode.COLOR,
                 type=VideoDayNightType.MECHANISM,
             ),
             VideoDayNight(
                 delay_seconds=2,
-                sensitivity=VideoSensitivity.MEDIUM,
+                sensitivity=Sensitivity.MEDIUM,
                 mode=VideoMode.COLOR,
                 type=VideoDayNightType.MECHANISM,
             ),
             VideoDayNight(
                 delay_seconds=2,
-                sensitivity=VideoSensitivity.MEDIUM,
+                sensitivity=Sensitivity.MEDIUM,
                 mode=VideoMode.COLOR,
                 type=VideoDayNightType.MECHANISM,
             ),

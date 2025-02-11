@@ -6,11 +6,11 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from amcrest_api.imaging import (
     ConfigNo,
+    Sensitivity,
     VideoDayNight,
     VideoDayNightType,
     VideoImageControl,
     VideoMode,
-    VideoSensitivity,
 )
 from homeassistant.components.select.const import DOMAIN as SELECT_DOMAIN
 from homeassistant.components.select.const import SERVICE_SELECT_OPTION
@@ -80,13 +80,13 @@ async def test_async_select_video_input_day_night(
 
     vdn_from = VideoDayNight(
         delay_seconds=2,
-        sensitivity=VideoSensitivity.MEDIUM,
+        sensitivity=Sensitivity.MEDIUM,
         mode=VideoMode.BLACK_WHITE,
         type=VideoDayNightType.MECHANISM,
     )
     vdn_to = VideoDayNight(
         delay_seconds=2,
-        sensitivity=VideoSensitivity.MEDIUM,
+        sensitivity=Sensitivity.MEDIUM,
         mode=VideoMode.COLOR,
         type=VideoDayNightType.MECHANISM,
     )

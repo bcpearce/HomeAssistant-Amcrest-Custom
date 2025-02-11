@@ -158,10 +158,12 @@ class AmcrestDataCoordinator(DataUpdateCoordinator):
 
     @property
     def identifiers(self) -> set[tuple[str, str]]:
+        """Identifiers for device info."""
         return {(DOMAIN, str(self.fixed_config.serial_number))}
 
     @property
     def connections(self) -> set[tuple[str, str]]:
+        """Connections for device info."""
         return {
             (
                 CONNECTION_NETWORK_MAC,
