@@ -12,7 +12,7 @@ readme = "README.md"
 version = "0.2.3"
 requires-python = ">=3.13,<3.14"
 dependencies = [
-    "amcrest_api>=0.1.0a5",
+    "amcrest_api>=0.1.0",
 ]
 
 [dependency-groups]
@@ -81,9 +81,3 @@ testpaths = "tests"
 
 [tool.coverage.run]
 omit = ["amcrest_api/__main__.py"]
-
-[tool.uv.sources]
-amcrest_api = {workspace = true}
-
-[tool.uv.workspace]
-members = ["../amcrest-api"]

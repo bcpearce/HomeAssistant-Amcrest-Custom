@@ -12,7 +12,7 @@
     "amcrest"
   ],
   "requirements": [
-    "amcrest_api==0.1.0a5"
+    "amcrest_api==0.1.0"
   ],
   "version": "0.2.3",
   "zeroconf": [
