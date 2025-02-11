@@ -61,6 +61,8 @@ class AmcrestDataCoordinator(DataUpdateCoordinator):
             "ptz_status",
             "smart_track_on",
             "storage_info",
+            "video_image_control",
+            "video_input_day_night",
         ]
 
         tasks = [
@@ -70,6 +72,8 @@ class AmcrestDataCoordinator(DataUpdateCoordinator):
             asyncio.create_task(self.api.async_ptz_status),
             asyncio.create_task(self.api.async_get_smart_track_on()),
             asyncio.create_task(self.api.async_storage_info),
+            asyncio.create_task(self.api.async_video_image_control),
+            asyncio.create_task(self.api.async_get_video_in_day_night()),
         ]
 
         results = await asyncio.gather(*tasks)
@@ -154,10 +158,12 @@ class AmcrestDataCoordinator(DataUpdateCoordinator):
 
     @property
     def identifiers(self) -> set[tuple[str, str]]:
+        """Identifiers for device info."""
         return {(DOMAIN, str(self.fixed_config.serial_number))}
 
     @property
     def connections(self) -> set[tuple[str, str]]:
+        """Connections for device info."""
         return {
             (
                 CONNECTION_NETWORK_MAC,

@@ -6,7 +6,6 @@ import voluptuous as vol
 import yarl
 from amcrest_api.camera import Camera as AmcrestApiCamera
 from amcrest_api.const import StreamType
-from homeassistant.components.zeroconf import ZeroconfServiceInfo
 from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
 from homeassistant.const import (
     ATTR_SERIAL_NUMBER,
@@ -29,6 +28,7 @@ from homeassistant.helpers.selector import (
     TextSelectorConfig,
     TextSelectorType,
 )
+from homeassistant.helpers.service_info.zeroconf import ZeroconfServiceInfo
 from homeassistant.util import ssl as hass_ssl
 from httpx import HTTPStatusError
 
