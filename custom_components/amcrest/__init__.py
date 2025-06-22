@@ -178,6 +178,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: AmcrestConfigEntry) -> b
         scheme=url.scheme,
         verify=hass_ssl.get_default_context(),
     )
+
     coordinator = AmcrestDataCoordinator(hass, api)
     await coordinator.async_config_entry_first_refresh()
 
