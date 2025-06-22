@@ -3,7 +3,7 @@
 import asyncio
 from asyncio import Task
 from dataclasses import asdict
-from datetime import timedelta
+from datetime import datetime, timedelta
 from logging import Logger, getLogger
 from typing import Any
 
@@ -49,6 +49,17 @@ class AmcrestDataCoordinator(DataUpdateCoordinator):
 
     async def async_get_fixed_config(self) -> AmcrestFixedConfig:
         """Obtain the fixed parameters of the camera."""
+        # If there is a significant timedelta, fix the time.
+        # The time resets to a default upon power cycling the camera.
+        camera_time: datetime = await self.api.async_get_current_time()
+        current_time = datetime.now()
+
+        if abs(camera_time - current_time) > timedelta(days=1):
+            _LOGGER.warning(
+                f"Camera's current time of {camera_time}, differs by more than one day from system time."  # noqa E501
+            )
+            _LOGGER.warning(f"Setting the time on the camera at {self.api.url}")
+            await self.api.async_set_current_time(current_time)
         return await self.api.async_get_fixed_config()
 
     async def async_poll_endpoints(self) -> AmcrestData:
