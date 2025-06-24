@@ -1,5 +1,3 @@
 {
-  "name": "Amcrest Custom",
-  "description": "Amcrest integration to replace default legacy integration.",
-  "render_readme": true
+  "name": "Amcrest Custom"
 }
