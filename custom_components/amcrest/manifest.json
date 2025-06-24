@@ -1,44 +1,45 @@
 {
-  "domain": "amcrest",
-  "name": "Amcrest",
-  "codeowners": [
-    "@bcpearce"
-  ],
-  "config_flow": true,
-  "documentation": "https://github.com/bcpearce/homeassistant-amcrest-custom",
-  "integration_type": "device",
-  "iot_class": "local_push",
-  "loggers": [
-    "amcrest"
-  ],
-  "requirements": [
-    "amcrest_api==0.1.1"
-  ],
-  "version": "0.2.4",
-  "zeroconf": [
-    {
-      "properties": {
-        "mac": "9c:8e:cd:*"
-      },
-      "type": "_http._tcp.local."
-    },
-    {
-      "properties": {
-        "mac": "a0:60:32:*"
-      },
-      "type": "_http._tcp.local."
-    },
-    {
-      "properties": {
-        "mac": "00:65:1e:*"
-      },
-      "type": "_http._tcp.local."
-    },
-    {
-      "properties": {
-        "mac": "34:46:63:2*"
-      },
-      "type": "_http._tcp.local."
-    }
-  ]
+	"codeowners": [
+		"@bcpearce"
+	],
+	"config_flow": true,
+	"documentation": "https://github.com/bcpearce/homeassistant-amcrest-custom",
+	"domain": "amcrest",
+	"integration_type": "device",
+	"iot_class": "local_push",
+	"issue_tracker": "https://github.com/bcpearce/homeassistant-amcrest-custom/issues",
+	"loggers": [
+		"amcrest"
+	],
+	"name": "Amcrest",
+	"requirements": [
+		"amcrest_api==0.1.1"
+	],
+	"version": "0.2.4",
+	"zeroconf": [
+		{
+			"properties": {
+				"mac": "9c:8e:cd:*"
+			},
+			"type": "_http._tcp.local."
+		},
+		{
+			"properties": {
+				"mac": "a0:60:32:*"
+			},
+			"type": "_http._tcp.local."
+		},
+		{
+			"properties": {
+				"mac": "00:65:1e:*"
+			},
+			"type": "_http._tcp.local."
+		},
+		{
+			"properties": {
+				"mac": "34:46:63:2*"
+			},
+			"type": "_http._tcp.local."
+		}
+	]
 }
