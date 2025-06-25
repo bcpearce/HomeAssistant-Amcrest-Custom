@@ -30,6 +30,10 @@ repos:
     hooks:
     - id: codespell
       exclude: "^tests/fixtures/mock_responses"
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.7
+    hooks:
+    - id: actionlint
   - repo: local
     hooks:
       - id: check_version
@@ -47,3 +51,6 @@ repos:
         language: system
         entry: sh hooks/runtests.sh
         files: ^(custom_components/.*\.py|tests/.*\.py)$
+
+ci:
+  skip: [ hassfest, pytest, mypy, check_version ]
