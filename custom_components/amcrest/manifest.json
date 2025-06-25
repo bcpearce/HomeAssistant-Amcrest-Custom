@@ -8,6 +8,7 @@
   "documentation": "https://github.com/bcpearce/homeassistant-amcrest-custom",
   "integration_type": "device",
   "iot_class": "local_push",
+  "issue_tracker": "https://github.com/bcpearce/homeassistant-amcrest-custom/issues",
   "loggers": [
     "amcrest"
   ],
