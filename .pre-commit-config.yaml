@@ -53,4 +53,4 @@ repos:
         files: ^(custom_components/.*\.py|tests/.*\.py)$
 
 ci:
-  skip: [ hassfest, pytest, mypy ]  
+  skip: [ hassfest, pytest, mypy ]
