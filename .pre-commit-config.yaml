@@ -34,6 +34,12 @@ repos:
     rev: v1.7.7
     hooks:
     - id: actionlint
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    # uv version.
+    rev: 0.8.13
+    hooks:
+      - id: uv-lock
+      - id: uv-export
   - repo: local
     hooks:
       - id: check_version
