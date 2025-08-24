@@ -2,6 +2,8 @@ name: Run tests
 
 on:
   push:
+    branches:
+      - main
   pull_request:
   workflow_dispatch:
 
@@ -13,7 +15,7 @@ jobs:
       - name: "Install uv"
         uses: astral-sh/setup-uv@v5
         with:
-          version: "0.7.13"
+          version: "0.8.13"
       - name: "Set up Python"
         uses: actions/setup-python@v5
         with:
