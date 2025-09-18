@@ -2,8 +2,6 @@
 
 Amcrest integration to replace default legacy integration.
 
-This project is a work in progress.
-
 ![test coverage](./coverage.svg)
 
 ## Installation
@@ -59,16 +57,29 @@ One camera entity will be setup for the main stream and each substream. It suppo
 
 ### Sensor
 
-PTZ position is provided for each supported Axis:
-- Pan
-- Tilt
-- Zoom
+- Pan position
+- Tilt position
+- Zoom position
+- Total SD card Capacity
+- Used SD card Capacity
+- URL
 
 ### Select
 
 - PTZ Preset
+- Video Rotation
+- Video Input Mode (Color Profile/Night Mode)
 
 ### Switch
 
 - Privacy Mode
 - Smart Tracking (PTZ follows detected movement)
+
+## Supported Hardware
+
+This was developed using a IP4M-1041B. If you have a model camera that you have tested this integration with which you would like to report, feel free to open a Pull Request updating this table.
+
+| Brand  | Model      |                    |
+|--------|------------|--------------------|
+|Amcrest | IP2M-841B  | :white_check_mark: |
+|Amcrest | IP4M-1041B | :white_check_mark: |
