@@ -75,9 +75,9 @@ One camera entity will be setup for the main stream and each substream. It suppo
 - Privacy Mode
 - Smart Tracking (PTZ follows detected movement)
 
-## Supported Hardware 
+## Supported Hardware
 
-This was developed using a IP4M-1041B. If you have a model camera that you have tested this integration with which you would like to report, feel free to open a Pull Request updating this table. 
+This was developed using a IP4M-1041B. If you have a model camera that you have tested this integration with which you would like to report, feel free to open a Pull Request updating this table.
 
 | Brand  | Model      |                    |
 |--------|------------|--------------------|
