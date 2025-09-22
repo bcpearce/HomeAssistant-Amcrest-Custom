@@ -203,15 +203,15 @@ wheels = [
 
 [[package]]
 name = "amcrest-api"
-version = "0.1.5"
+version = "0.1.6"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "httpx" },
     { name = "yarl" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/85/4a/baf7b7f5ca3ac259c0544fb096e12860ee2f94e291f82236b7785de3f072/amcrest_api-0.1.5.tar.gz", hash = "sha256:3a7479d1335496ff7a8cb9d88512859746d987befe3085ec11bdd00c47b4451b", size = 110006, upload-time = "2025-09-21T15:56:09.851Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/39/9f/a5b9d07446ed081923f356d3afa59cde63af27116cb1ef64113115875d51/amcrest_api-0.1.6.tar.gz", hash = "sha256:b35c24bb140d6d4119f9cafa8c8ca1e58615862460f79b5aa99e7f9ac618f451", size = 110113, upload-time = "2025-09-22T03:10:54.489Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f7/44/d3b8b5ea34d2790585f47ade3a7dd2812d1fdf0c1f0c82e4c18b93b1fae2/amcrest_api-0.1.5-py3-none-any.whl", hash = "sha256:2b601ee74fdf565df5302e69031fe8962c92bad29476a4f47221606b854a6ebe", size = 17583, upload-time = "2025-09-21T15:56:08.773Z" },
+    { url = "https://files.pythonhosted.org/packages/4b/33/eed95d58d829570b7ac005a3b6fc56bb903cacb46a66e4e41fde1db2e918/amcrest_api-0.1.6-py3-none-any.whl", hash = "sha256:a2d2917c87147ad89854910dc0860dc7f7a178854075a0032e6f3070d23b30be", size = 17716, upload-time = "2025-09-22T03:10:53.06Z" },
 ]
 
 [[package]]
@@ -978,7 +978,7 @@ wheels = [
 
 [[package]]
 name = "homeassistant-amcrest-custom"
-version = "0.2.8"
+version = "0.2.9"
 source = { editable = "." }
 dependencies = [
     { name = "amcrest-api" },
@@ -1002,7 +1002,7 @@ fix-hass-error = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "amcrest-api", specifier = ">=0.1.5" }]
+requires-dist = [{ name = "amcrest-api", specifier = ">=0.1.6" }]
 
 [package.metadata.requires-dev]
 dev = [
