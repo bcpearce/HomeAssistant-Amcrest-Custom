@@ -13,7 +13,7 @@ repos:
         - --autofix
         - --top-keys=domain,title,name
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.13.3
+    rev: v0.14.2
     hooks:
     - id: ruff
       args: [ --fix ]
@@ -31,12 +31,12 @@ repos:
     - id: codespell
       exclude: "^tests/fixtures/mock_responses"
   - repo: https://github.com/rhysd/actionlint
-    rev: v1.7.7
+    rev: v1.7.8
     hooks:
     - id: actionlint
   - repo: https://github.com/astral-sh/uv-pre-commit
     # uv version.
-    rev: 0.8.23
+    rev: 0.9.5
     hooks:
       - id: uv-lock
       - id: uv-export
