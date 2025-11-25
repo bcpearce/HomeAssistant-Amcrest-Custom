@@ -2,6 +2,7 @@
 
 from unittest.mock import AsyncMock, patch
 
+from amcrest_api.config import Config as AmcrestFixedConfig
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from pytest_homeassistant_custom_component.common import MockConfigEntry
@@ -12,6 +13,8 @@ from tests.const import MOCK_DATA_UPDATE, MOCK_FIXED_CONFIG
 async def setup_integration(
     hass: HomeAssistant,
     config_entry: MockConfigEntry,
+    *,
+    fixed_config: AmcrestFixedConfig = MOCK_FIXED_CONFIG,
 ) -> ConfigEntry | None:
     """Fixture for setting up the component."""
     config_entry.add_to_hass(hass)
@@ -19,7 +22,7 @@ async def setup_integration(
         patch(
             "custom_components.amcrest.coordinator.AmcrestDataCoordinator.async_get_fixed_config",
             new_callable=AsyncMock,
-            return_value=MOCK_FIXED_CONFIG,
+            return_value=fixed_config,
         ),
         patch(
             "custom_components.amcrest.coordinator.AmcrestDataCoordinator.async_poll_endpoints",

@@ -77,9 +77,11 @@ class AmcrestCameraEntity(CameraEntity, RestoreEntity, AmcrestEntity):
         self._attr_can_pan = coordinator.fixed_config.ptz_capabilities.pan
         self._attr_can_tilt = coordinator.fixed_config.ptz_capabilities.tilt
         self._attr_can_zoom = coordinator.fixed_config.ptz_capabilities.zoom
-        self._attr_supported_features = (
-            CameraEntityFeature.STREAM | CameraEntityFeature.ON_OFF
-        )
+
+        self._attr_supported_features = CameraEntityFeature.STREAM
+        if self.coordinator.fixed_config.privacy_mode_available:
+            self._attr_supported_features |= CameraEntityFeature.ON_OFF
+
         self._stream_type = stream_type
         self._attr_unique_id = (
             f"{self.coordinator.fixed_config.serial_number}-{self._stream_type}"

@@ -13,9 +13,9 @@
     "amcrest"
   ],
   "requirements": [
-    "amcrest_api==0.1.6"
+    "amcrest_api==0.1.7"
   ],
-  "version": "0.2.9",
+  "version": "0.2.10",
   "zeroconf": [
     {
       "properties": {

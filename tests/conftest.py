@@ -19,7 +19,7 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.amcrest.const import CONF_MDNS, DOMAIN
 
-from .const import MOCK_FIXED_CONFIG
+from .const import MOCK_FIXED_CONFIG, MOCK_NOPRIVACY_FIXED_CONFIG
 
 TEST_IP_ADDRESS: str = "10.0.0.2"
 
@@ -96,3 +96,9 @@ def fixture_mock_zeroconf_config_entry(
 def fixture_mock_fixed_config() -> AmcrestFixedConfig:
     """Fixture for mock physical config."""
     return MOCK_FIXED_CONFIG
+
+
+@pytest.fixture(name="mock_noprivacy_fixed_config")
+def fixture_mock_noprivacy_fixed_config() -> AmcrestFixedConfig:
+    """Fixture for mock physical config."""
+    return MOCK_NOPRIVACY_FIXED_CONFIG
