@@ -2,7 +2,7 @@
 
 Amcrest integration to replace default legacy integration.
 
-![test coverage](./coverage.svg)
+[![Coverage Status](https://coveralls.io/repos/github/bcpearce/HomeAssistant-Amcrest-Custom/badge.svg?branch=main)](https://coveralls.io/github/bcpearce/HomeAssistant-Amcrest-Custom?branch=main)
 
 ## Installation
 

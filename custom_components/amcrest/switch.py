@@ -21,13 +21,10 @@ async def async_setup_entry(
 ) -> None:
     """Set up Amcrest binary sensors."""
     coordinator = entry.runtime_data
-
-    async_add_entities(
-        [
-            AmcrestPrivacyModeSwitch(coordinator),
-            AmcrestPtzSmartTrackSwitch(coordinator),
-        ]
-    )
+    entities: list[Entity] = [AmcrestPtzSmartTrackSwitch(coordinator)]
+    if coordinator.fixed_config.privacy_mode_available:
+        entities.append(AmcrestPrivacyModeSwitch(coordinator))
+    async_add_entities(entities)
 
 
 def _async_get_device_id(entity: Entity) -> str:

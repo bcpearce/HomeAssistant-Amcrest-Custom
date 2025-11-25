@@ -37,7 +37,10 @@ from .utils import setup_integration
 
 @pytest.fixture(
     name="parameterized_config_entry",
-    params=["mock_config_entry", "mock_zeroconf_config_entry"],
+    params=[
+        "mock_config_entry",
+        "mock_zeroconf_config_entry",
+    ],
 )
 def parameterized_config_entry_fixture(
     request: Any,
@@ -92,6 +95,7 @@ async def test_load_and_unload_entry(
         )
         device_id = entities[0].device_id
         assert all(entity.device_id == device_id for entity in entities)
+        assert "switch.amc_test_privacy_mode" in [e.entity_id for e in entities]
 
         await hass.config_entries.async_remove(entry.entry_id)
         await hass.async_block_till_done()
@@ -99,8 +103,42 @@ async def test_load_and_unload_entry(
         assert str(entry.state) == str(ConfigEntryState.NOT_LOADED)
 
 
+async def test_load_no_privacy_mode(
+    hass: HomeAssistant,
+    mock_config_entry: MockConfigEntry,
+    mock_noprivacy_fixed_config: AmcrestFixedConfig,
+) -> None:
+    """Test setup of the integration."""
+    with (
+        patch(
+            "custom_components.amcrest.coordinator.AmcrestDataCoordinator.async_get_fixed_config",
+            new_callable=AsyncMock,
+            return_value=mock_noprivacy_fixed_config,
+        ),
+        patch(
+            "custom_components.amcrest.coordinator.AmcrestDataCoordinator.async_poll_endpoints",
+            new_callable=AsyncMock,
+            return_value=AmcrestData(),
+        ),
+    ):
+        entry = await setup_integration(
+            hass, mock_config_entry, fixed_config=mock_noprivacy_fixed_config
+        )
+
+        assert entry.state is ConfigEntryState.LOADED
+
+        # all entries belong to the same device
+        entity_registry = er.async_get(hass)
+        entities = entity_registry.entities.get_entries_for_config_entry_id(
+            entry.entry_id
+        )
+        assert "switch.amc_test_privacy_mode" not in [e.entity_id for e in entities]
+
+
 async def test_ptz_service_call(
-    hass: HomeAssistant, mock_config_entry: MockConfigEntry
+    hass: HomeAssistant,
+    mock_config_entry: MockConfigEntry,
+    mock_fixed_config: AmcrestFixedConfig,
 ) -> None:
     """Test PTZ service call."""
     entry = await setup_integration(hass, mock_config_entry)
@@ -152,6 +190,7 @@ async def test_ptz_service_call(
 async def test_ptz_preset_name_service_call(
     hass: HomeAssistant,
     mock_config_entry: MockConfigEntry,
+    mock_fixed_config: AmcrestFixedConfig,
     freezer: FrozenDateTimeFactory,
 ) -> None:
     """Test setting/naming of a PTZ preset."""

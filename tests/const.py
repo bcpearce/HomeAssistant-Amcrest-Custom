@@ -28,6 +28,25 @@ MOCK_FIXED_CONFIG = AmcrestFixedConfig(
     },
     session_physical_address="a0:60:32:ff:ff:ff",
     max_extra_stream=1,
+    privacy_mode_available=True,
+)
+
+MOCK_NOPRIVACY_FIXED_CONFIG = AmcrestFixedConfig(
+    machine_name="AMC_TEST_NOPRIV",
+    device_type="AMC_TEST_DEV_NOPRIV",
+    hardware_version="1.00",
+    network={},
+    ptz_capabilities=PtzCapabilityData(preset=True),
+    serial_number="123456",
+    supported_events=[],
+    software_version="1",
+    supported_streams={
+        StreamType.MAIN: StreamTypeName.MAIN,
+        StreamType.SUBSTREAM1: StreamTypeName.SUBSTREAM1,
+    },
+    session_physical_address="a0:60:32:ff:ff:ff",
+    max_extra_stream=1,
+    privacy_mode_available=False,
 )
 
 MOCK_DATA_UPDATE = AmcrestData(
