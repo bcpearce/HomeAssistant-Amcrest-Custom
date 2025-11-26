@@ -202,15 +202,15 @@ wheels = [
 
 [[package]]
 name = "amcrest-api"
-version = "0.1.7"
+version = "0.1.8"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "httpx" },
     { name = "yarl" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/09/e1/bb539de919d1bd5a75ca4b0feb82d0b459e970aa70d08ef44ea8830ba7db/amcrest_api-0.1.7.tar.gz", hash = "sha256:457fa30f6ec05d937595c63cd65a1083c91bf73c4dd730de62a66b3e7e214fa6", size = 110111 }
+sdist = { url = "https://files.pythonhosted.org/packages/f0/c3/ef94ddaafa84a22e92451619c149a1db9f0027f34d4099ccbcd38e8a7d4d/amcrest_api-0.1.8.tar.gz", hash = "sha256:7602d3cfa7c168b2bc3f6f7d381e178881bcbcad1671d227aece2c5db355195e", size = 111980 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d9/f3/40c003d891656160f9065a47da07590994fbad6276c387b3a8cfe3222e4d/amcrest_api-0.1.7-py3-none-any.whl", hash = "sha256:a1a18d5c434ec7e96346c631b686d5ec1f4fd1ed53f435f6806d09df95d1bb6e", size = 17845 },
+    { url = "https://files.pythonhosted.org/packages/f8/8d/d762a5f68b034593607333e4e9d081a3b5b9eb2137d4c92f57935f590bf0/amcrest_api-0.1.8-py3-none-any.whl", hash = "sha256:c400d66d0fda967117909c1de5e2d0ab7fc7dc51918b2f629098501f999760d5", size = 17916 },
 ]
 
 [[package]]
@@ -987,7 +987,7 @@ fix-hass-error = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "amcrest-api", specifier = ">=0.1.7" }]
+requires-dist = [{ name = "amcrest-api", specifier = ">=0.1.8" }]
 
 [package.metadata.requires-dev]
 dev = [

@@ -12,7 +12,7 @@ readme = "README.md"
 version = "0.2.10"
 requires-python = ">=3.13,<3.14"
 dependencies = [
-    "amcrest_api>=0.1.7",
+    "amcrest_api>=0.1.8",
 ]
 
 [dependency-groups]

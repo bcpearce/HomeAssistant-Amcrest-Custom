@@ -56,9 +56,10 @@ class AmcrestDataCoordinator(DataUpdateCoordinator):
 
         if abs(camera_time - current_time) > timedelta(days=1):
             _LOGGER.warning(
-                f"Camera's current time of {camera_time}, differs by more than one day from system time."  # noqa E501
+                "Camera's current time of %s, differs by more than one day from system time.",  # noqa E501
+                camera_time,
             )
-            _LOGGER.warning(f"Setting the time on the camera at {self.api.url}")
+            _LOGGER.warning("Setting the time on the camera at %s", self.api.url)
             await self.api.async_set_current_time(current_time)
         return await self.api.async_get_fixed_config()
 
@@ -67,10 +68,8 @@ class AmcrestDataCoordinator(DataUpdateCoordinator):
 
         kw_names = [
             "ptz_presets",
-            "privacy_mode_on",
             "lighting",
             "ptz_status",
-            "smart_track_on",
             "storage_info",
             "video_image_control",
             "video_input_day_night",
@@ -78,14 +77,19 @@ class AmcrestDataCoordinator(DataUpdateCoordinator):
 
         tasks = [
             asyncio.create_task(self.api.async_ptz_preset_info),
-            asyncio.create_task(self.api.async_get_privacy_mode_on()),
             asyncio.create_task(self.api.async_lighting_config),
             asyncio.create_task(self.api.async_ptz_status),
-            asyncio.create_task(self.api.async_get_smart_track_on()),
             asyncio.create_task(self.api.async_storage_info),
             asyncio.create_task(self.api.async_video_image_control),
             asyncio.create_task(self.api.async_get_video_in_day_night()),
         ]
+        if self.fixed_config.privacy_mode_available:
+            tasks.append(asyncio.create_task(self.api.async_get_privacy_mode_on()))
+            kw_names.append("privacy_mode_on")
+
+        if self.fixed_config.privacy_mode_available:
+            tasks.append(asyncio.create_task(self.api.async_get_smart_track_on()))
+            kw_names.append("smart_track_on")
 
         results = await asyncio.gather(*tasks)
 
