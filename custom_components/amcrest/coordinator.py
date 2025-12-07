@@ -47,6 +47,16 @@ class AmcrestDataCoordinator(DataUpdateCoordinator):
         self.amcrest_data = AmcrestData()
         self.data = asdict(self.amcrest_data)
 
+    def _has_ptz_caps(self) -> bool:
+        ptz_caps = self.fixed_config.ptz_capabilities
+        return bool(
+            ptz_caps.pan
+            or ptz_caps.tilt
+            or ptz_caps.zoom
+            or ptz_caps.preset
+            or ptz_caps.tour
+        )
+
     async def async_get_fixed_config(self) -> AmcrestFixedConfig:
         """Obtain the fixed parameters of the camera."""
         # If there is a significant timedelta, fix the time.
@@ -69,7 +79,6 @@ class AmcrestDataCoordinator(DataUpdateCoordinator):
         kw_names = [
             "ptz_presets",
             "lighting",
-            "ptz_status",
             "storage_info",
             "video_image_control",
             "video_input_day_night",
@@ -78,11 +87,15 @@ class AmcrestDataCoordinator(DataUpdateCoordinator):
         tasks = [
             asyncio.create_task(self.api.async_ptz_preset_info),
             asyncio.create_task(self.api.async_lighting_config),
-            asyncio.create_task(self.api.async_ptz_status),
             asyncio.create_task(self.api.async_storage_info),
             asyncio.create_task(self.api.async_video_image_control),
             asyncio.create_task(self.api.async_get_video_in_day_night()),
         ]
+
+        if self._has_ptz_caps():
+            kw_names.append("ptz_status")
+            tasks.append(asyncio.create_task(self.api.async_ptz_status))
+
         if self.fixed_config.privacy_mode_available:
             tasks.append(asyncio.create_task(self.api.async_get_privacy_mode_on()))
             kw_names.append("privacy_mode_on")
