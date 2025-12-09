@@ -74,7 +74,8 @@ class PtzPresetSelectEntity(AmcrestEntity, SelectEntity):
             preset = next(
                 preset
                 for preset in self.coordinator.amcrest_data.ptz_presets
-                if ptz_status is not None and preset.index == ptz_status.preset_id
+                if ptz_status is not None
+                and int(preset.index) == int(ptz_status.preset_id)
             )
             self._attr_current_option = preset.name
         except StopIteration:

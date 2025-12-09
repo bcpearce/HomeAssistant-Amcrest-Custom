@@ -76,17 +76,18 @@ class AmcrestDataCoordinator(DataUpdateCoordinator):
     async def async_poll_endpoints(self) -> AmcrestData:
         """Poll the endpoints for entity data."""
 
+        # TODO Re-enable lighting polling when the entity is added
         kw_names = [
             "ptz_presets",
-            "lighting",
+            # "lighting",
             "storage_info",
             "video_image_control",
             "video_input_day_night",
         ]
 
-        tasks = [
+        tasks: list[Task] = [
             asyncio.create_task(self.api.async_ptz_preset_info),
-            asyncio.create_task(self.api.async_lighting_config),
+            # asyncio.create_task(self.api.async_lighting_config),  # noqa: E501
             asyncio.create_task(self.api.async_storage_info),
             asyncio.create_task(self.api.async_video_image_control),
             asyncio.create_task(self.api.async_get_video_in_day_night()),
@@ -100,17 +101,23 @@ class AmcrestDataCoordinator(DataUpdateCoordinator):
             tasks.append(asyncio.create_task(self.api.async_get_privacy_mode_on()))
             kw_names.append("privacy_mode_on")
 
-        if self.fixed_config.privacy_mode_available:
+        if self.fixed_config.smart_track_available:
             tasks.append(asyncio.create_task(self.api.async_get_smart_track_on()))
             kw_names.append("smart_track_on")
 
-        results = await asyncio.gather(*tasks)
+        results: list[Any] = await asyncio.gather(*tasks, return_exceptions=True)
 
         # motion is special as it is a push endpoint, append the existing one
         kw_names.append("last_video_motion_event")
         results.append(self.amcrest_data.last_video_motion_event)
 
-        return AmcrestData(**dict(zip(kw_names, results, strict=False)))
+        return AmcrestData(
+            **dict(
+                (k, v)
+                for k, v in zip(kw_names, results, strict=False)
+                if not isinstance(v, Exception)
+            )
+        )
 
     async def _async_setup(self) -> None:
         self.fixed_config = await self.async_get_fixed_config()
