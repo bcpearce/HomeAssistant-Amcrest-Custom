@@ -77,7 +77,7 @@ class AmcrestDataCoordinator(DataUpdateCoordinator):
         """Poll the endpoints for entity data."""
         kw_names = [
             "ptz_presets",
-            "lighting",
+            # TODO(Enable Lighting Updates)"lighting",
             "storage_info",
             "video_image_control",
             "video_input_day_night",
@@ -85,7 +85,7 @@ class AmcrestDataCoordinator(DataUpdateCoordinator):
 
         tasks: list[Task] = [
             asyncio.create_task(self.api.async_ptz_preset_info),
-            asyncio.create_task(self.api.async_lighting_config),
+            # TODO(Enable Lighting updates) asyncio.create_task(self.api.async_lighting_config),  # noqa: E501
             asyncio.create_task(self.api.async_storage_info),
             asyncio.create_task(self.api.async_video_image_control),
             asyncio.create_task(self.api.async_get_video_in_day_night()),
