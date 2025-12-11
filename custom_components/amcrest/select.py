@@ -75,10 +75,10 @@ class PtzPresetSelectEntity(AmcrestEntity, SelectEntity):
                 preset
                 for preset in self.coordinator.amcrest_data.ptz_presets
                 if ptz_status is not None
-                and int(preset.index) == int(ptz_status.preset_id)
+                and str(preset.index) == str(ptz_status.preset_id)
             )
             self._attr_current_option = preset.name
-        except StopIteration:
+        except (StopIteration, TypeError):
             self._attr_current_option = None
         self.async_write_ha_state()
 
