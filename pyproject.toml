@@ -9,7 +9,7 @@ packages = []
 name="homeassistant-amcrest-custom"
 description="Custom Amcrest integration for Home Assistant to replace the default."
 readme = "README.md"
-version = "0.2.12"
+version = "0.2.13"
 requires-python = ">=3.13,<3.14"
 dependencies = [
     "amcrest_api>=0.1.8",
