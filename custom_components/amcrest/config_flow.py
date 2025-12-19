@@ -73,7 +73,7 @@ class AmcrestConfigFlow(ConfigFlow, domain=DOMAIN):
                     self._config[CONF_MDNS][CONF_NAME] = self._discovered.name
                 else:
                     url = yarl.URL(user_input[CONF_URL])
-                    self._config[CONF_URL] = url
+                    self._config[CONF_URL] = str(url)
 
                 self._camera_api = AmcrestApiCamera(
                     host=url.host,
