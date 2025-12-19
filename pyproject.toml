@@ -1,19 +1,19 @@
 [build-system]
-requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
+requires = ["setuptools", "wheel"]
 
 [tool.setuptools]
 packages = []
 
 [project]
-name="homeassistant-amcrest-custom"
-description="Custom Amcrest integration for Home Assistant to replace the default."
-readme = "README.md"
-version = "0.2.13"
-requires-python = ">=3.13,<3.14"
 dependencies = [
-    "amcrest_api>=0.1.8",
+  "amcrest_api>=0.1.8",
 ]
+description = "Custom Amcrest integration for Home Assistant to replace the default."
+name = "homeassistant-amcrest-custom"
+readme = "README.md"
+requires-python = ">=3.13,<3.14"
+version = "0.2.14"
 
 [dependency-groups]
 dev = [
@@ -34,29 +34,29 @@ fix-hass-error = [
 ]
 
 [tool.codespell]
-ignore-words-list="hass"
-skip="uv.lock"
+ignore-words-list = "hass"
+skip = "uv.lock"
 
 [tool.mypy]
-python_version = "3.13"
-show_error_codes = true
-follow_imports = "silent"
-local_partial_types = true
-strict_equality = true
-no_implicit_optional = false
-warn_incomplete_stub = true
-warn_redundant_casts = true
-warn_unused_configs = true
-warn_unused_ignores = true
 check_untyped_defs = true
+disable_error_code = "union-attr"
 disallow_incomplete_defs = true
 disallow_subclassing_any = true
 disallow_untyped_calls = true
 disallow_untyped_decorators = true
 disallow_untyped_defs = true
+follow_imports = "silent"
+local_partial_types = true
+no_implicit_optional = false
+python_version = "3.13"
+show_error_codes = true
+strict_equality = true
+warn_incomplete_stub = true
+warn_redundant_casts = true
 warn_return_any = true
 warn_unreachable = true
-disable_error_code = "union-attr"
+warn_unused_configs = true
+warn_unused_ignores = true
 
 [tool.ruff.lint]
 select = [
@@ -74,8 +74,8 @@ docstring-code-format = true
 quote-style = "double"
 
 [tool.pytest.ini_options]
-asyncio_mode = "auto"
 addopts = "--cov=custom_components.amcrest --cov-report=xml --junitxml test_results.xml"
+asyncio_mode = "auto"
 testpaths = "tests"
 
 [tool.coverage.run]
