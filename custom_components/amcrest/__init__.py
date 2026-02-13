@@ -192,5 +192,5 @@ async def async_setup_entry(hass: HomeAssistant, entry: AmcrestConfigEntry) -> b
 async def async_unload_entry(hass: HomeAssistant, entry: AmcrestConfigEntry) -> bool:
     """Unload a config entry."""
     did_unload = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
-    await entry.runtime_data.async_disable_event_listener()
+    await entry.runtime_data.async_disable_event_listener(None)
     return did_unload

@@ -3,10 +3,16 @@
 from dataclasses import dataclass, field
 from typing import Any
 
-from amcrest_api.event import VideoMotionEvent
+from amcrest_api.event import EventAction, VideoMotionEvent
 from amcrest_api.imaging import VideoDayNight, VideoImageControl
 from amcrest_api.ptz import PtzPresetData, PtzStatusData
 from amcrest_api.storage import StorageDeviceInfo
+
+
+class AudioMutationEvent:
+    # TODO: Stub until added to amcrest-api
+    action: EventAction = EventAction.Start
+    pass
 
 
 @dataclass
@@ -15,6 +21,7 @@ class AmcrestData:
 
     ptz_presets: list[PtzPresetData] = field(default_factory=list)
     last_video_motion_event: VideoMotionEvent | None = None
+    last_audio_mutation_event: AudioMutationEvent | None = None
     privacy_mode_on: bool | None = None  # doubles as on/off
     smart_track_on: bool | None = None
     lighting: Any | None = None  # LightingConfigData

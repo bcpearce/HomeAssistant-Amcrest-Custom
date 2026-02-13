@@ -30,6 +30,7 @@ class AmcrestDataCoordinator(DataUpdateCoordinator):
 
     _event_listener_task: Task | None = None
     _should_listen_for_events: bool = False
+    event_listener_filter: set[str] = set()
     amcrest_data: AmcrestData
     fixed_config: AmcrestFixedConfig
     api: AmcrestApiCamera
@@ -107,9 +108,11 @@ class AmcrestDataCoordinator(DataUpdateCoordinator):
 
         results: list[Any] = await asyncio.gather(*tasks, return_exceptions=True)
 
-        # motion is special as it is a push endpoint, append the existing one
+        # Events are special as they come from a push endpoint, append the existing ones
         kw_names.append("last_video_motion_event")
         results.append(self.amcrest_data.last_video_motion_event)
+        kw_names.append("last_audio_mutation_event")
+        results.append(self.amcrest_data.last_audio_mutation_event)
 
         return AmcrestData(
             **dict(
@@ -126,42 +129,60 @@ class AmcrestDataCoordinator(DataUpdateCoordinator):
         self.amcrest_data = await self.async_poll_endpoints()
         # restore the listener if it failed unexpectedly
         if self._should_listen_for_events and not self.is_listening_for_events:
-            self.async_enable_event_listener()
+            self.async_enable_event_listener(self.event_listener_filter)
         return asdict(self.amcrest_data)
 
     @callback
-    def async_enable_event_listener(self) -> None:
+    def async_enable_event_listener(
+        self, add_to_filter: set[EventMessageType] | EventMessageType
+    ) -> None:
         """Enable the event listener."""
-        if not self.is_listening_for_events:
-            self._event_listener_task = self.config_entry.async_create_background_task(
-                self.hass,
-                self.async_listen_for_camera_events(),
-                f"amcrest {self.data.get(CONF_NAME)}",
-            )
-            self._should_listen_for_events = True
-        self.async_update_listeners()
+        if isinstance(add_to_filter, EventMessageType):
+            add_to_filter = {add_to_filter}
+        self.event_listener_filter |= add_to_filter
+        if len(self.event_listener_filter) > 0:
+            if not self.is_listening_for_events:
+                self._event_listener_task = (
+                    self.config_entry.async_create_background_task(
+                        self.hass,
+                        self.async_listen_for_camera_events(),
+                        f"amcrest {self.data.get(CONF_NAME)}",
+                    )
+                )
+                self._should_listen_for_events = True
+            self.async_update_listeners()
 
     @callback
-    async def async_disable_event_listener(self) -> None:
+    async def async_disable_event_listener(
+        self, remove_from_filter: set[EventMessageType] | EventMessageType | None
+    ) -> None:
         """Disable the event listener."""
-        if self._event_listener_task is not None:
-            try:
-                self._event_listener_task.cancel()
-                await self._event_listener_task
-            finally:
-                self._event_listener_task = None
+        if remove_from_filter is None:
+            self.event_listener_filter.clear()
+        else:
+            if isinstance(remove_from_filter, EventMessageType):
+                remove_from_filter = {remove_from_filter}
+            self.event_listener_filter -= remove_from_filter
+        if len(self.event_listener_filter) == 0:
+            if self._event_listener_task is not None:
+                try:
+                    self._event_listener_task.cancel()
+                    await self._event_listener_task
+                finally:
+                    self._event_listener_task = None
+            self._should_listen_for_events = False
         self.async_update_listeners()
-        self._should_listen_for_events = False
 
     async def async_listen_for_camera_events(self) -> None:
         """Listen for events."""
         try:
             _LOGGER.debug(
-                "Begin listening for motion events on device %s",
+                "Begin listening for events { %s } events on device %s",
+                ", ".join(self.event_listener_filter),
                 self.data.get(CONF_NAME),
             )
             async for event in self.api.async_listen_events(
-                heartbeat_seconds=30, filter_events=[EventMessageType.VideoMotion]
+                heartbeat_seconds=30, filter_events=self.event_listener_filter
             ):
                 _LOGGER.debug(event)
                 if isinstance(event, VideoMotionEvent):
