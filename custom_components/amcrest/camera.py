@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
 from amcrest_api.const import StreamType
+from amcrest_api.event import EventMessageType
 from homeassistant.components.camera import Camera as CameraEntity
 from homeassistant.components.camera import CameraEntityFeature
 from homeassistant.core import callback
@@ -141,18 +142,23 @@ class AmcrestCameraEntity(CameraEntity, RestoreEntity, AmcrestEntity):
 
     async def async_enable_motion_detection(self) -> None:
         """Enable motion detection."""
-        self.coordinator.async_enable_event_listener()
+        self.coordinator.async_enable_event_listener(EventMessageType.VideoMotion)
         self.async_write_ha_state()
 
     async def async_disable_motion_detection(self) -> None:
         """Disable motion detection."""
-        await self.coordinator.async_disable_event_listener()
+        await self.coordinator.async_disable_event_listener(
+            EventMessageType.VideoMotion
+        )
         self.async_write_ha_state()
 
     @property
     def motion_detection_enabled(self) -> bool:
         """Motion detection listener is running."""
-        return self.coordinator.is_listening_for_events
+        return (
+            self.coordinator.is_listening_for_events
+            and EventMessageType.VideoMotion in self.coordinator.event_listener_filter
+        )
 
     async def async_camera_image(
         self, width: int | None = None, height: int | None = None

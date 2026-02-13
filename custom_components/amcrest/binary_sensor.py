@@ -58,3 +58,31 @@ class AmcrestVideoMotionSensor(AmcrestEntity, BinarySensorEntity):
             # Unavailable if not listening
             self._attr_is_on = None
         self.async_write_ha_state()
+
+
+class AmcrestAudioMutationSensor(AmcrestEntity, BinarySensorEntity):
+    """Binary sensor for Amcrest camera."""
+
+    _attr_has_entity_name = True
+    _attr_device_class = BinarySensorDeviceClass.SOUND
+    _attr_translation_key = "audio_detected"
+
+    def __init__(self, coordinator: AmcrestDataCoordinator) -> None:
+        """Initialize entity."""
+        super().__init__(coordinator=coordinator)
+        self._attr_unique_id = f"{coordinator.fixed_config.serial_number}-audio_sensor"
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        if self.coordinator.is_listening_for_events:
+            if self.coordinator.amcrest_data.last_audio_mutation_event is None:
+                self._attr_is_on = False
+            else:
+                self._attr_is_on = (
+                    self.coordinator.amcrest_data.last_audio_mutation_event.action
+                    == EventAction.Start
+                )
+        else:
+            # Unavailable if not listening
+            self._attr_is_on = None
+        self.async_write_ha_state()
