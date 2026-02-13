@@ -70,9 +70,9 @@ aiozoneinfo==0.2.1 \
     --hash=sha256:04579f855f030cd0edb1758659c513142ef1aaf7fcc97b59eb2262ed0c453cce \
     --hash=sha256:457e2c665a2c7e093119efb87cc5e0da29e6f59aac504a544bec822c5be1cb6b
     # via homeassistant
-amcrest-api==0.1.8 \
-    --hash=sha256:7602d3cfa7c168b2bc3f6f7d381e178881bcbcad1671d227aece2c5db355195e \
-    --hash=sha256:c400d66d0fda967117909c1de5e2d0ab7fc7dc51918b2f629098501f999760d5
+amcrest-api==0.1.9 \
+    --hash=sha256:26be3553fe9dd92dddfdde2580d60adad3212b0b3bad3418b3c4e9ef50823ec2 \
+    --hash=sha256:3fcaeef220056b394e76ee44e91f522908c81dd62d3d422a09179c4adce54b51
     # via homeassistant-amcrest-custom
 annotated-types==0.7.0 \
     --hash=sha256:1f02e8b43a8fbbc3f3e0d4f0f4bfc8131bcb4eebe8849b8e5c773f3a1c582a53 \
@@ -431,14 +431,12 @@ greenlet==3.1.1 ; platform_machine == 'AMD64' or platform_machine == 'WIN32' or 
     --hash=sha256:275f72decf9932639c1c6dd1013a1bc266438eb32710016a1c742df5da6e60a1 \
     --hash=sha256:411f015496fec93c1c8cd4e5238da364e1da7a124bcb293f085bf2860c32c6f6 \
     --hash=sha256:4ce3ac6cdb6adf7946475d7ef31777c26d94bccc377e070a7986bd2d5c515467 \
-    --hash=sha256:4ead44c85f8ab905852d3de8d86f6f8baf77109f9da589cb4fa142bd3b57b475 \
     --hash=sha256:6510bf84a6b643dabba74d3049ead221257603a253d0a9873f55f6a59a65f822 \
     --hash=sha256:667a9706c970cb552ede35aee17339a18e8f2a87a51fba2ed39ceeeb1004798a \
     --hash=sha256:7876452af029456b3f3549b696bb36a06db7c90747740c5302f74a9e9fa14b13 \
     --hash=sha256:8320f64b777d00dd7ccdade271eaf0cad6636343293a25074cc5566160e4de7b \
     --hash=sha256:935e943ec47c4afab8965954bf49bfa639c05d4ccf9ef6e924188f762145c0ff \
     --hash=sha256:b42703b1cf69f2aa1df7d1030b9d77d3e584a70755674d60e710f0af570f3761 \
-    --hash=sha256:b8a678974d1f3aa55f6cc34dc480169d58f2e6d8958895d68845fa4ab566509e \
     --hash=sha256:c4aab7f6381f38a4b42f269057aee279ab0fc7bf2e929e3d4abfae97b682a12c \
     --hash=sha256:efc0f674aa41b92da8c49e0346318c6075d734994c3c4e4430b1c3f853e498e4 \
     --hash=sha256:f1695e76146579f8c06c1509c7ce4dfe0706f49c6831a817ac04eebb2fd02011

@@ -19,7 +19,7 @@ async def async_setup_entry(
     entry: AmcrestConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up Amcrest binary sensors."""
+    """Set up Amcrest switches."""
     coordinator = entry.runtime_data
     entities: list[Entity] = []
     if coordinator.fixed_config.smart_track_available:
