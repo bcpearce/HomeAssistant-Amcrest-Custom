@@ -3,6 +3,7 @@
 from typing import Any
 
 import homeassistant.helpers.device_registry as dr
+from amcrest_api.event import EventMessageType
 from homeassistant.components.switch import SwitchDeviceClass, SwitchEntity
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity import Entity
@@ -26,6 +27,8 @@ async def async_setup_entry(
         entities.append(AmcrestPtzSmartTrackSwitch(coordinator))
     if coordinator.fixed_config.privacy_mode_available:
         entities.append(AmcrestPrivacyModeSwitch(coordinator))
+    if EventMessageType.VideoMotion in coordinator.fixed_config.supported_events:
+        entities.append(AmcrestEnableMotionDetectionSwitch(coordinator))
     async_add_entities(entities)
 
 
@@ -102,4 +105,49 @@ class AmcrestPtzSmartTrackSwitch(AmcrestEntity, SwitchEntity):
     @callback
     def _handle_coordinator_update(self) -> None:
         self._attr_is_on = self.coordinator.amcrest_data.smart_track_on
+        self.async_write_ha_state()
+
+
+class AmcrestEnableMotionDetectionSwitch(AmcrestEntity, SwitchEntity):
+    """Smart Track Switch. Automatically tracks detected motion."""
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "enable_motion_detection"
+    _attr_device_class = SwitchDeviceClass.SWITCH
+
+    def __init__(self, coordinator: AmcrestDataCoordinator) -> None:
+        """Initialize the switch."""
+        super().__init__(coordinator=coordinator)
+        self._attr_unique_id = (
+            f"{coordinator.fixed_config.serial_number}-enable_motion_detection"
+        )
+        self._attr_is_on = (
+            coordinator.is_listening_for_events
+            and EventMessageType.VideoMotion in coordinator.event_listener_filter
+        )
+
+    async def _handle_enable_motion_detection(self, turn_on: bool) -> None:
+        if turn_on:
+            self.coordinator.async_enable_event_listener(EventMessageType.VideoMotion)
+        else:
+            await self.coordinator.async_disable_event_listener(
+                EventMessageType.VideoMotion
+            )
+        self._attr_is_on = turn_on
+        self.async_write_ha_state()
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        """Turn smart tracking on."""
+        await self._handle_enable_motion_detection(True)
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        """Turn smart tracking off."""
+        await self._handle_enable_motion_detection(False)
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        self._attr_is_on = (
+            self.coordinator.is_listening_for_events
+            and EventMessageType.VideoMotion in self.coordinator.event_listener_filter
+        )
         self.async_write_ha_state()
