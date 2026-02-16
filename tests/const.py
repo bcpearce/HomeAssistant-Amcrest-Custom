@@ -4,6 +4,7 @@ import dataclasses
 
 from amcrest_api.config import Config as AmcrestFixedConfig
 from amcrest_api.const import StreamType, StreamTypeName
+from amcrest_api.event import EventMessageType
 from amcrest_api.imaging import (
     Sensitivity,
     VideoDayNight,
@@ -22,16 +23,17 @@ MOCK_FIXED_CONFIG = AmcrestFixedConfig(
     network={},
     ptz_capabilities=PtzCapabilityData(preset=True),
     serial_number="123456",
-    supported_events=[],
+    supported_events=[EventMessageType.VideoMotion, EventMessageType.AudioMutation],
     software_version="1",
     supported_streams={
         StreamType.MAIN: StreamTypeName.MAIN,
         StreamType.SUBSTREAM1: StreamTypeName.SUBSTREAM1,
     },
     session_physical_address="a0:60:32:ff:ff:ff",
-    max_extra_stream=1,
+    max_extra_stream=StreamType.SUBSTREAM1,
     privacy_mode_available=True,
     smart_track_available=True,
+    audio_detect_available=True,
 )
 
 MOCK_NOPRIVACY_FIXED_CONFIG = dataclasses.replace(

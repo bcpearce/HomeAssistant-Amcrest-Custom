@@ -1,15 +1,19 @@
 """Switches for Amcrest integration."""
 
-from typing import Any
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any
 
-import homeassistant.helpers.device_registry as dr
+from amcrest_api.event import EventMessageType
 from homeassistant.components.switch import SwitchDeviceClass, SwitchEntity
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.restore_state import ExtraStoredData, RestoreEntity
 
 from . import AmcrestConfigEntry, AmcrestDataCoordinator
 from .entity import AmcrestEntity
+
+if TYPE_CHECKING:
+    from homeassistant.helpers.entity import Entity
 
 PARALLEL_UPDATES = 0
 
@@ -26,17 +30,11 @@ async def async_setup_entry(
         entities.append(AmcrestPtzSmartTrackSwitch(coordinator))
     if coordinator.fixed_config.privacy_mode_available:
         entities.append(AmcrestPrivacyModeSwitch(coordinator))
+    if EventMessageType.VideoMotion in coordinator.fixed_config.supported_events:
+        entities.append(AmcrestEnableMotionDetectionSwitch(coordinator))
+    if EventMessageType.AudioMutation in coordinator.fixed_config.supported_events:
+        entities.append(AmcrestEnableAudioMutationDetectionSwitch(coordinator))
     async_add_entities(entities)
-
-
-def _async_get_device_id(entity: Entity) -> str:
-    if entity.device_info is None:
-        raise ValueError("No device associated with entity")
-    device_registry: dr.DeviceRegistry = dr.async_get(entity.hass)
-    device_entry = device_registry.async_get_device(entity.device_info["identifiers"])
-    if device_entry is None:
-        raise RuntimeError("No device entry found for entity")
-    return device_entry.id
 
 
 class AmcrestPrivacyModeSwitch(AmcrestEntity, SwitchEntity):
@@ -102,4 +100,131 @@ class AmcrestPtzSmartTrackSwitch(AmcrestEntity, SwitchEntity):
     @callback
     def _handle_coordinator_update(self) -> None:
         self._attr_is_on = self.coordinator.amcrest_data.smart_track_on
+        self.async_write_ha_state()
+
+
+class AmcrestEnableMotionDetectionSwitch(AmcrestEntity, SwitchEntity):
+    """Smart Track Switch. Automatically tracks detected motion."""
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "enable_motion_detection"
+    _attr_device_class = SwitchDeviceClass.SWITCH
+
+    def __init__(self, coordinator: AmcrestDataCoordinator) -> None:
+        """Initialize the switch."""
+        super().__init__(coordinator=coordinator)
+        self._attr_unique_id = (
+            f"{coordinator.fixed_config.serial_number}-enable_motion_detection"
+        )
+        self._attr_is_on = (
+            coordinator.is_listening_for_events
+            and EventMessageType.VideoMotion in coordinator.event_listener_filter
+        )
+
+    async def _handle_enable_motion_detection(self, turn_on: bool) -> None:
+        if turn_on:
+            self.coordinator.async_enable_event_listener(EventMessageType.VideoMotion)
+        else:
+            await self.coordinator.async_disable_event_listener(
+                EventMessageType.VideoMotion
+            )
+        self._attr_is_on = turn_on
+        self.async_write_ha_state()
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        """Turn motion detection on."""
+        await self._handle_enable_motion_detection(True)
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        """Turn motion detection off."""
+        await self._handle_enable_motion_detection(False)
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        self._attr_is_on = (
+            self.coordinator.is_listening_for_events
+            and EventMessageType.VideoMotion in self.coordinator.event_listener_filter
+        )
+        self.async_write_ha_state()
+
+
+@dataclass(kw_only=True)
+class AmcrestEnableAudioExtraStoredData(ExtraStoredData):
+    """Additional data for entity restoration."""
+
+    audio_detection_enabled: bool = False
+
+    def as_dict(self) -> dict[str, Any]:
+        """Return a dict representation of the extra data."""
+        return {"audio_detection_enabled": self.audio_detection_enabled}
+
+
+class AmcrestEnableAudioMutationDetectionSwitch(
+    AmcrestEntity, RestoreEntity, SwitchEntity
+):
+    """Audio Mutation Detection. Enables audio mutation detection."""
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "enable_audio_mutation_detection"
+    _attr_device_class = SwitchDeviceClass.SWITCH
+
+    def __init__(self, coordinator: AmcrestDataCoordinator) -> None:
+        """Initialize the switch."""
+        super().__init__(coordinator=coordinator)
+        self._attr_unique_id = (
+            f"{coordinator.fixed_config.serial_number}-enable_audio_mutation_detection"
+        )
+        self._attr_is_on = (
+            coordinator.is_listening_for_events
+            and EventMessageType.AudioMutation in coordinator.event_listener_filter
+        )
+
+    @property
+    def extra_restore_state_data(self) -> ExtraStoredData | None:
+        """Return motion detection state."""
+        return AmcrestEnableAudioExtraStoredData(
+            audio_detection_enabled=bool(self._attr_is_on)
+        )
+
+    async def async_added_to_hass(self) -> None:
+        """
+        Call when added to hass.
+        Re-enable audio detection state.
+        """
+        await super().async_added_to_hass()
+        if (
+            extra_data := await self.async_get_last_extra_data()
+        ) is not None and AmcrestEnableAudioExtraStoredData(
+            **extra_data.as_dict()
+        ).audio_detection_enabled:
+            await self.async_turn_on()
+        else:
+            await self.async_turn_off()
+
+    async def _handle_enable_audio_mutation_detection(self, turn_on: bool) -> None:
+        if turn_on:
+            await self.coordinator.api.async_set_audio_detect_on(True)
+            self.coordinator.async_enable_event_listener(EventMessageType.AudioMutation)
+        else:
+            await self.coordinator.async_disable_event_listener(
+                EventMessageType.AudioMutation
+            )
+            await self.coordinator.api.async_set_audio_detect_on(False)
+        self._attr_is_on = turn_on
+        self.async_write_ha_state()
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        """Turn audio mutation detection on."""
+        await self._handle_enable_audio_mutation_detection(True)
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        """Turn audio mutation detection off."""
+        await self._handle_enable_audio_mutation_detection(False)
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        self._attr_is_on = (
+            self.coordinator.is_listening_for_events
+            and EventMessageType.AudioMutation in self.coordinator.event_listener_filter
+        )
         self.async_write_ha_state()

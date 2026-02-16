@@ -12,6 +12,7 @@ from homeassistant.components import zeroconf
 from homeassistant.components.zeroconf import IPVersion
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
+    ATTR_DEVICE_ID,
     CONF_NAME,
     CONF_PASSWORD,
     CONF_TYPE,
@@ -61,12 +62,12 @@ def async_coordinator_from_service_call(
 ) -> AmcrestDataCoordinator:
     """Get the coordinator from a call with a device ID."""
     registry = dr.async_get(call.hass)
-    entry_id = registry.async_get(call.data["device_id"]).primary_config_entry
+    entry_id = registry.async_get(call.data[ATTR_DEVICE_ID]).primary_config_entry
     if entry_id is None:
         raise ServiceValidationError(
             DOMAIN,
             "device_not_found",
-            translation_placeholders={"device_id": call.data["device_id"]},
+            translation_placeholders={ATTR_DEVICE_ID: call.data[ATTR_DEVICE_ID]},
         )
     coordinator: AmcrestDataCoordinator = call.hass.config_entries.async_get_entry(
         entry_id
@@ -192,5 +193,5 @@ async def async_setup_entry(hass: HomeAssistant, entry: AmcrestConfigEntry) -> b
 async def async_unload_entry(hass: HomeAssistant, entry: AmcrestConfigEntry) -> bool:
     """Unload a config entry."""
     did_unload = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
-    await entry.runtime_data.async_disable_event_listener()
+    await entry.runtime_data.async_disable_event_listener(None)
     return did_unload

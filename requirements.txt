@@ -70,9 +70,9 @@ aiozoneinfo==0.2.1 \
     --hash=sha256:04579f855f030cd0edb1758659c513142ef1aaf7fcc97b59eb2262ed0c453cce \
     --hash=sha256:457e2c665a2c7e093119efb87cc5e0da29e6f59aac504a544bec822c5be1cb6b
     # via homeassistant
-amcrest-api==0.1.9 \
-    --hash=sha256:26be3553fe9dd92dddfdde2580d60adad3212b0b3bad3418b3c4e9ef50823ec2 \
-    --hash=sha256:3fcaeef220056b394e76ee44e91f522908c81dd62d3d422a09179c4adce54b51
+amcrest-api==0.1.10 \
+    --hash=sha256:2360b99065007b05438b4efe53fa195e2c0ac667fa1f3680c5ba1f0df1ae8dcd \
+    --hash=sha256:c3968286ae3bd1e39d568cbff6e1b00cd43c276f62988face0258b74b8da659f
     # via homeassistant-amcrest-custom
 annotated-types==0.7.0 \
     --hash=sha256:1f02e8b43a8fbbc3f3e0d4f0f4bfc8131bcb4eebe8849b8e5c773f3a1c582a53 \

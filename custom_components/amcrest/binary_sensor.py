@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from amcrest_api.event import EventAction
+from amcrest_api.event import EventAction, EventMessageType
 from homeassistant.components.binary_sensor import (
     BinarySensorDeviceClass,
     BinarySensorEntity,
@@ -29,11 +29,13 @@ async def async_setup_entry(
     """Set up Amcrest binary sensors."""
     coordinator = entry.runtime_data
 
-    async_add_entities([AmcrestVideoMotionSensor(coordinator)])
+    async_add_entities(
+        [AmcrestVideoMotionSensor(coordinator), AmcrestAudioMutationSensor(coordinator)]
+    )
 
 
 class AmcrestVideoMotionSensor(AmcrestEntity, BinarySensorEntity):
-    """Binary sensor for Amcrest camera."""
+    """Binary sensor for Amcrest camera motion detection."""
 
     _attr_has_entity_name = True
     _attr_device_class = BinarySensorDeviceClass.MOTION
@@ -46,12 +48,48 @@ class AmcrestVideoMotionSensor(AmcrestEntity, BinarySensorEntity):
 
     @callback
     def _handle_coordinator_update(self) -> None:
-        if self.coordinator.is_listening_for_events:
+        if (
+            self.coordinator.is_listening_for_events
+            and EventMessageType.VideoMotion in self.coordinator.event_listener_filter
+        ):
             if self.coordinator.amcrest_data.last_video_motion_event is None:
                 self._attr_is_on = False
             else:
                 self._attr_is_on = (
                     self.coordinator.amcrest_data.last_video_motion_event.action
+                    == EventAction.Start
+                )
+        else:
+            # Unavailable if not listening
+            self._attr_is_on = None
+        self.async_write_ha_state()
+
+
+class AmcrestAudioMutationSensor(AmcrestEntity, BinarySensorEntity):
+    """Binary sensor for Amcrest camera audio mutation."""
+
+    _attr_has_entity_name = True
+    _attr_device_class = BinarySensorDeviceClass.SOUND
+    _attr_translation_key = "audio_detected"
+
+    def __init__(self, coordinator: AmcrestDataCoordinator) -> None:
+        """Initialize entity."""
+        super().__init__(coordinator=coordinator)
+        self._attr_unique_id = (
+            f"{coordinator.fixed_config.serial_number}-audio_mutation_sensor"
+        )
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        if (
+            self.coordinator.is_listening_for_events
+            and EventMessageType.AudioMutation in self.coordinator.event_listener_filter
+        ):
+            if self.coordinator.amcrest_data.last_audio_mutation_event is None:
+                self._attr_is_on = False
+            else:
+                self._attr_is_on = (
+                    self.coordinator.amcrest_data.last_audio_mutation_event.action
                     == EventAction.Start
                 )
         else:
