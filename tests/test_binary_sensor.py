@@ -1,10 +1,11 @@
 """Test Binary Sensor Entities."""
 
 import asyncio
-from collections.abc import AsyncGenerator
+from collections.abc import AsyncGenerator, Callable, Iterable
 from typing import TYPE_CHECKING, Any
 from unittest.mock import AsyncMock, patch
 
+import pytest
 from amcrest_api.event import (
     AudioMutationEvent,
     EventAction,
@@ -39,25 +40,26 @@ import builtins
 from freezegun.api import FrozenDateTimeFactory
 
 
-async def mock_event_generator(
-    **kwargs: dict[Any, Any],
-) -> AsyncGenerator[EventBase | None]:
-    """Mock event generation."""
-    try:
-        yield HeartbeatEvent()
-        await asyncio.sleep(5.0)
-        yield VideoMotionEvent(action=EventAction.Start, raw_data="{}")
-        await asyncio.sleep(5.0)
-        yield VideoMotionEvent(action=EventAction.Stop, raw_data="{}")
-        await asyncio.sleep(5.0)
-        yield AudioMutationEvent(action=EventAction.Start, raw_data="null")
-        await asyncio.sleep(5.0)
-        yield AudioMutationEvent(action=EventAction.Stop, raw_data="null")
-        while True:  # run till cancelled
-            await asyncio.sleep(30.0)
+def _make_mock_event_generator(
+    events: Iterable[EventBase], *, interval: float = 5.0, wait_until: float = 30.0
+) -> Callable[[], Any]:
+    async def mock_event_generator(
+        **kwargs: dict[Any, Any],
+    ) -> AsyncGenerator[EventBase | None]:
+        """Mock event generation."""
+        try:
             yield HeartbeatEvent()
-    except asyncio.CancelledError:
-        pass  # other errors should fail the test
+            await asyncio.sleep(interval)
+            for event in events:
+                yield event
+                await asyncio.sleep(interval)
+            while True:  # run till cancelled
+                await asyncio.sleep(30.0)
+                yield HeartbeatEvent()
+        except asyncio.CancelledError:
+            pass  # other errors should fail the test
+
+    return mock_event_generator
 
 
 async def mock_error_event_generator(
@@ -72,88 +74,120 @@ async def mock_error_event_generator(
         pass  # other errors should fail the test
 
 
-async def test_async_test_motion_and_audio_detected(
+UUT_MOTION_SENSOR = "binary_sensor.amc_test_motion_detected"
+UUT_AUDIO_SENSOR = "binary_sensor.amc_test_audio_detected"
+UUT_CAMERA = "camera.amc_test_main_stream"
+UUT_MOTION_ENABLE_SWITCH = "switch.amc_test_enable_motion_detection"
+UUT_AUDIO_ENABLE_SWITCH = "switch.amc_test_enable_audio_detection"
+
+TEST_EVENT_DETECTION_DATA = [
+    (
+        [
+            VideoMotionEvent(action=EventAction.Start, raw_data="{}"),
+            VideoMotionEvent(action=EventAction.Stop, raw_data="{}"),
+        ],
+        (
+            CAMERA_DOMAIN,
+            SERVICE_ENABLE_MOTION,
+        ),
+        (
+            CAMERA_DOMAIN,
+            SERVICE_DISABLE_MOTION,
+        ),
+        UUT_CAMERA,
+        UUT_MOTION_SENSOR,
+    ),
+    (
+        [
+            VideoMotionEvent(action=EventAction.Start, raw_data="{}"),
+            VideoMotionEvent(action=EventAction.Stop, raw_data="{}"),
+        ],
+        (
+            SWITCH_DOMAIN,
+            SERVICE_TURN_ON,
+        ),
+        (SWITCH_DOMAIN, SERVICE_TURN_OFF),
+        UUT_MOTION_ENABLE_SWITCH,
+        UUT_MOTION_SENSOR,
+    ),
+    (
+        [
+            AudioMutationEvent(action=EventAction.Start, raw_data="null"),
+            AudioMutationEvent(action=EventAction.Stop, raw_data="null"),
+        ],
+        (
+            SWITCH_DOMAIN,
+            SERVICE_TURN_ON,
+        ),
+        (SWITCH_DOMAIN, SERVICE_TURN_OFF),
+        UUT_AUDIO_ENABLE_SWITCH,
+        UUT_AUDIO_SENSOR,
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    "mock_events,enable_event_args,disable_event_args,enable_entity_id,sensor_entity_id",
+    TEST_EVENT_DETECTION_DATA,
+    ids=[
+        "Motion enabled by camera",
+        "Motion enabled by switch",
+        "Audio enabled by switch",
+    ],
+)
+async def test_async_test_event_detection(
     hass: HomeAssistant,
     mock_config_entry: MockConfigEntry,
     freezer: FrozenDateTimeFactory,
+    mock_events: list[EventBase],
+    enable_event_args: tuple[str, str],
+    disable_event_args: tuple[str, str],
+    enable_entity_id: str,
+    sensor_entity_id: str,
 ) -> None:
-    """Test binary sensor for motion and audio detection."""
+    """Test binary sensor for motion detection."""
 
     entry = await setup_integration(hass, mock_config_entry)
     assert entry is not None
     coordinator: AmcrestDataCoordinator = entry.runtime_data
+    coordinator.api.async_set_audio_detect_on = AsyncMock()
 
-    UUT_MOTION_SENSOR = "binary_sensor.amc_test_motion_detected"
-    UUT_AUDIO_SENSOR = "binary_sensor.amc_test_audio_detected"
-    UUT_AUDIO_ENABLE_SWITCH = "switch.amc_test_enable_audio_detection"
-    UUT_CAMERA = "camera.amc_test_main_stream"
+    TICK = 5.0
     # precondition, unknown state
-    assert hass.states.is_state(UUT_MOTION_SENSOR, STATE_UNKNOWN)
-    assert hass.states.is_state(UUT_AUDIO_SENSOR, STATE_UNKNOWN)
-
-    coordinator.api.async_listen_events = mock_event_generator
-
+    assert hass.states.is_state(sensor_entity_id, STATE_UNKNOWN)
+    coordinator.api.async_listen_events = _make_mock_event_generator(
+        mock_events, interval=TICK
+    )
     await hass.services.async_call(
-        CAMERA_DOMAIN,
-        SERVICE_ENABLE_MOTION,
-        target={ATTR_ENTITY_ID: UUT_CAMERA},
+        enable_event_args[0],
+        enable_event_args[1],
+        target={ATTR_ENTITY_ID: enable_entity_id},
         blocking=True,
     )
     await hass.async_block_till_done()
 
     assert coordinator.is_listening_for_events
-    assert hass.states.is_state(UUT_MOTION_SENSOR, STATE_OFF)
+    assert hass.states.is_state(sensor_entity_id, STATE_OFF)
 
     # advance time, expect the event to fire for Video Motion Start
-    freezer.tick(5.01)
+    freezer.tick(TICK + 0.01)
     async_fire_time_changed(hass)
     await hass.async_block_till_done()
     assert coordinator.is_listening_for_events
-    assert hass.states.is_state(UUT_MOTION_SENSOR, STATE_ON)
+    assert hass.states.is_state(sensor_entity_id, STATE_ON)
 
     # advance time again, expect the event to fire for Video Motion Stop
-    freezer.tick(5.01)
+    freezer.tick(TICK + 0.01)
     async_fire_time_changed(hass)
     await hass.async_block_till_done()
     assert coordinator.is_listening_for_events
-    assert hass.states.is_state(UUT_MOTION_SENSOR, STATE_OFF)
-
-    # enable audio detection and expect initial state to be off
-    coordinator.api.async_set_audio_detect_on = AsyncMock()
-    await hass.services.async_call(
-        SWITCH_DOMAIN,
-        SERVICE_TURN_ON,
-        target={ATTR_ENTITY_ID: UUT_AUDIO_ENABLE_SWITCH},
-        blocking=True,
-    )
-    await hass.async_block_till_done()
-    assert hass.states.is_state(UUT_AUDIO_SENSOR, STATE_OFF)
-
-    # advance time, expect the event to fire for Audio Mutation Start
-    freezer.tick(5.01)
-    async_fire_time_changed(hass)
-    await hass.async_block_till_done()
-    assert coordinator.is_listening_for_events
-    assert hass.states.is_state(UUT_AUDIO_SENSOR, STATE_ON)
-
-    # advance time again, expect the event to fire for Audio Mutation Stop
-    freezer.tick(5.01)
-    async_fire_time_changed(hass)
-    await hass.async_block_till_done()
-    assert coordinator.is_listening_for_events
-    assert hass.states.is_state(UUT_AUDIO_SENSOR, STATE_OFF)
+    assert hass.states.is_state(sensor_entity_id, STATE_OFF)
 
     # disable event generation
     await hass.services.async_call(
-        CAMERA_DOMAIN,
-        SERVICE_DISABLE_MOTION,
-        target={ATTR_ENTITY_ID: UUT_CAMERA},
-        blocking=True,
-    )
-    await hass.services.async_call(
-        SWITCH_DOMAIN,
-        SERVICE_TURN_OFF,
-        target={ATTR_ENTITY_ID: UUT_AUDIO_ENABLE_SWITCH},
+        disable_event_args[0],
+        disable_event_args[1],
+        target={ATTR_ENTITY_ID: enable_entity_id},
         blocking=True,
     )
     await hass.async_block_till_done(wait_background_tasks=True)
@@ -162,7 +196,7 @@ async def test_async_test_motion_and_audio_detected(
     async_fire_time_changed(hass)
     await hass.async_block_till_done()
 
-    assert hass.states.is_state(UUT_MOTION_SENSOR, STATE_UNKNOWN)
+    assert hass.states.is_state(sensor_entity_id, STATE_UNKNOWN)
     assert not coordinator.is_listening_for_events
 
 
@@ -202,14 +236,21 @@ async def test_restore_motion_detection(
     assert hass.states.is_state(UUT_SENSOR, STATE_OFF)
 
     # advance time, expect the exception to be raised, and the sensor to be unavailable
-    freezer.tick(5.01)
+    TICK = 5.0
+    freezer.tick(TICK + 0.01)
     async_fire_time_changed(hass)
     await hass.async_block_till_done()
     assert not coordinator.is_listening_for_events
     coordinator.async_update_listeners()  # type: ignore
     assert hass.states.is_state(UUT_SENSOR, STATE_UNKNOWN)
 
-    coordinator.api.async_listen_events = mock_event_generator
+    coordinator.api.async_listen_events = _make_mock_event_generator(
+        [
+            VideoMotionEvent(action=EventAction.Start, raw_data="{}"),
+            VideoMotionEvent(action=EventAction.Stop, raw_data="{}"),
+        ],
+        interval=TICK,
+    )
     with patch(
         "custom_components.amcrest.coordinator.AmcrestDataCoordinator.async_poll_endpoints",
         new_callable=AsyncMock,

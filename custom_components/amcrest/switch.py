@@ -1,16 +1,17 @@
 """Switches for Amcrest integration."""
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-import homeassistant.helpers.device_registry as dr
 from amcrest_api.event import EventMessageType
 from homeassistant.components.switch import SwitchDeviceClass, SwitchEntity
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import AmcrestConfigEntry, AmcrestDataCoordinator
 from .entity import AmcrestEntity
+
+if TYPE_CHECKING:
+    from homeassistant.helpers.entity import Entity
 
 PARALLEL_UPDATES = 0
 
@@ -32,16 +33,6 @@ async def async_setup_entry(
     if EventMessageType.AudioMutation in coordinator.fixed_config.supported_events:
         entities.append(AmcrestEnableAudioMutationDetectionSwitch(coordinator))
     async_add_entities(entities)
-
-
-def _async_get_device_id(entity: Entity) -> str:
-    if entity.device_info is None:
-        raise ValueError("No device associated with entity")
-    device_registry: dr.DeviceRegistry = dr.async_get(entity.hass)
-    device_entry = device_registry.async_get_device(entity.device_info["identifiers"])
-    if device_entry is None:
-        raise RuntimeError("No device entry found for entity")
-    return device_entry.id
 
 
 class AmcrestPrivacyModeSwitch(AmcrestEntity, SwitchEntity):
