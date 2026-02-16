@@ -62,7 +62,7 @@ class AmcrestCameraEntity(CameraEntity, RestoreEntity, AmcrestEntity):
     _attr_can_pan = False
     _attr_can_tilt = False
     _attr_can_zoom = False
-    coordinator: AmcrestDataCoordinator | None = None  # type: ignore
+    coordinator: AmcrestDataCoordinator
 
     def __init__(
         self,
@@ -109,7 +109,6 @@ class AmcrestCameraEntity(CameraEntity, RestoreEntity, AmcrestEntity):
         Re-enable the motion detection state.
         """
         await super().async_added_to_hass()
-        extra_data: ExtraStoredData | None
         if (
             extra_data := await self.async_get_last_extra_data()
         ) is not None and AmcrestCameraExtraStoredData(

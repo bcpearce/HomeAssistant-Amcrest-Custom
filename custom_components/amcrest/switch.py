@@ -1,11 +1,13 @@
 """Switches for Amcrest integration."""
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
 from amcrest_api.event import EventMessageType
 from homeassistant.components.switch import SwitchDeviceClass, SwitchEntity
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.restore_state import ExtraStoredData, RestoreEntity
 
 from . import AmcrestConfigEntry, AmcrestDataCoordinator
 from .entity import AmcrestEntity
@@ -146,7 +148,20 @@ class AmcrestEnableMotionDetectionSwitch(AmcrestEntity, SwitchEntity):
         self.async_write_ha_state()
 
 
-class AmcrestEnableAudioMutationDetectionSwitch(AmcrestEntity, SwitchEntity):
+@dataclass(kw_only=True)
+class AmcrestEnableAudioExtraStoredData(ExtraStoredData):
+    """Additional data for entity restoration."""
+
+    audio_detection_enabled: bool = False
+
+    def as_dict(self) -> dict[str, Any]:
+        """Return a dict representation of the extra data."""
+        return {"audio_detection_enabled": self.audio_detection_enabled}
+
+
+class AmcrestEnableAudioMutationDetectionSwitch(
+    AmcrestEntity, RestoreEntity, SwitchEntity
+):
     """Audio Mutation Detection. Enables audio mutation detection."""
 
     _attr_has_entity_name = True
@@ -163,6 +178,28 @@ class AmcrestEnableAudioMutationDetectionSwitch(AmcrestEntity, SwitchEntity):
             coordinator.is_listening_for_events
             and EventMessageType.AudioMutation in coordinator.event_listener_filter
         )
+
+    @property
+    def extra_restore_state_data(self) -> ExtraStoredData | None:
+        """Return motion detection state."""
+        return AmcrestEnableAudioExtraStoredData(
+            audio_detection_enabled=bool(self._attr_is_on)
+        )
+
+    async def async_added_to_hass(self) -> None:
+        """
+        Call when added to hass.
+        Re-enable audio detection state.
+        """
+        await super().async_added_to_hass()
+        if (
+            extra_data := await self.async_get_last_extra_data()
+        ) is not None and AmcrestEnableAudioExtraStoredData(
+            **extra_data.as_dict()
+        ).audio_detection_enabled:
+            await self.async_turn_on()
+        else:
+            await self.async_turn_off()
 
     async def _handle_enable_audio_mutation_detection(self, turn_on: bool) -> None:
         if turn_on:

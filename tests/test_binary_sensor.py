@@ -135,7 +135,7 @@ TEST_EVENT_DETECTION_DATA = [
         "Audio enabled by switch",
     ],
 )
-async def test_async_test_event_detection(
+async def test_event_detection(
     hass: HomeAssistant,
     mock_config_entry: MockConfigEntry,
     freezer: FrozenDateTimeFactory,
@@ -200,13 +200,44 @@ async def test_async_test_event_detection(
     assert not coordinator.is_listening_for_events
 
 
-async def test_restore_motion_detection(
+TEST_RESTORE_EVENT_DETECTION_DATA = [
+    (
+        (
+            CAMERA_DOMAIN,
+            SERVICE_ENABLE_MOTION,
+        ),
+        UUT_CAMERA,
+        UUT_MOTION_SENSOR,
+    ),
+    (
+        (
+            SWITCH_DOMAIN,
+            SERVICE_TURN_ON,
+        ),
+        UUT_AUDIO_ENABLE_SWITCH,
+        UUT_AUDIO_SENSOR,
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    "enable_event_args,enable_entity_id,sensor_entity_id",
+    TEST_RESTORE_EVENT_DETECTION_DATA,
+    ids=[
+        "Motion enabled by camera",
+        "Audio enabled by switch",
+    ],
+)
+async def test_restore_event_detection(
     hass: HomeAssistant,
     mock_config_entry: MockConfigEntry,
     freezer: FrozenDateTimeFactory,
+    enable_event_args: tuple[str, str],
+    enable_entity_id: str,
+    sensor_entity_id: str,
 ) -> None:
     """
-    Test motion detection restoration.
+    Test event detection restoration.
 
     On an error, the listener will go down until the next polling operation.
     At that point, if the coordinator observes that the loop failed without
@@ -216,24 +247,23 @@ async def test_restore_motion_detection(
     entry = await setup_integration(hass, mock_config_entry)
     assert entry is not None
     coordinator: AmcrestDataCoordinator = entry.runtime_data
+    coordinator.api.async_set_audio_detect_on = AsyncMock()
 
-    UUT_SENSOR = "binary_sensor.amc_test_motion_detected"
-    UUT_CAMERA = "camera.amc_test_main_stream"
     # precondition, unknown state
-    assert hass.states.is_state(UUT_SENSOR, STATE_UNKNOWN)
+    assert hass.states.is_state(sensor_entity_id, STATE_UNKNOWN)
 
     coordinator.api.async_listen_events = mock_error_event_generator
 
     await hass.services.async_call(
-        CAMERA_DOMAIN,
-        SERVICE_ENABLE_MOTION,
-        target={ATTR_ENTITY_ID: UUT_CAMERA},
+        enable_event_args[0],
+        enable_event_args[1],
+        target={ATTR_ENTITY_ID: enable_entity_id},
         blocking=True,
     )
     await hass.async_block_till_done()
 
     assert coordinator.is_listening_for_events
-    assert hass.states.is_state(UUT_SENSOR, STATE_OFF)
+    assert hass.states.is_state(sensor_entity_id, STATE_OFF)
 
     # advance time, expect the exception to be raised, and the sensor to be unavailable
     TICK = 5.0
@@ -242,13 +272,10 @@ async def test_restore_motion_detection(
     await hass.async_block_till_done()
     assert not coordinator.is_listening_for_events
     coordinator.async_update_listeners()  # type: ignore
-    assert hass.states.is_state(UUT_SENSOR, STATE_UNKNOWN)
+    assert hass.states.is_state(sensor_entity_id, STATE_UNKNOWN)
 
     coordinator.api.async_listen_events = _make_mock_event_generator(
-        [
-            VideoMotionEvent(action=EventAction.Start, raw_data="{}"),
-            VideoMotionEvent(action=EventAction.Stop, raw_data="{}"),
-        ],
+        [],
         interval=TICK,
     )
     with patch(
@@ -261,4 +288,4 @@ async def test_restore_motion_detection(
         await hass.async_block_till_done()
 
     assert coordinator.is_listening_for_events
-    assert hass.states.is_state(UUT_SENSOR, STATE_OFF)
+    assert hass.states.is_state(sensor_entity_id, STATE_OFF)
