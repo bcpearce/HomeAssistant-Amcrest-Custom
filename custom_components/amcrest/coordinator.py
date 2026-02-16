@@ -9,7 +9,7 @@ from typing import Any
 
 from amcrest_api.camera import Camera as AmcrestApiCamera
 from amcrest_api.config import Config as AmcrestFixedConfig
-from amcrest_api.event import EventMessageType, VideoMotionEvent
+from amcrest_api.event import AudioMutationEvent, EventMessageType, VideoMotionEvent
 from homeassistant.const import CONF_NAME
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.device_registry import CONNECTION_NETWORK_MAC
@@ -140,6 +140,12 @@ class AmcrestDataCoordinator(DataUpdateCoordinator):
         if isinstance(add_to_filter, EventMessageType):
             add_to_filter = {add_to_filter}
         self.event_listener_filter |= add_to_filter
+        _LOGGER.debug(
+            "Update event listener for { %s } events on device %s (%s)",
+            ", ".join(self.event_listener_filter),
+            self.fixed_config.machine_name,
+            self.fixed_config.serial_number,
+        )
         if len(self.event_listener_filter) > 0:
             if not self.is_listening_for_events:
                 self._event_listener_task = (
@@ -163,6 +169,12 @@ class AmcrestDataCoordinator(DataUpdateCoordinator):
             if isinstance(remove_from_filter, EventMessageType):
                 remove_from_filter = {remove_from_filter}
             self.event_listener_filter -= remove_from_filter
+        _LOGGER.debug(
+            "Update event listener for { %s } events on device %s (%s)",
+            ", ".join(self.event_listener_filter),
+            self.fixed_config.machine_name,
+            self.fixed_config.serial_number,
+        )
         if len(self.event_listener_filter) == 0:
             if self._event_listener_task is not None:
                 try:
@@ -177,30 +189,43 @@ class AmcrestDataCoordinator(DataUpdateCoordinator):
         """Listen for events."""
         try:
             _LOGGER.debug(
-                "Begin listening for events { %s } events on device %s",
-                ", ".join(self.event_listener_filter),
-                self.data.get(CONF_NAME),
+                "Starting listener task on device %s (%s)",
+                self.fixed_config.machine_name,
+                self.fixed_config.serial_number,
             )
             async for event in self.api.async_listen_events(
-                heartbeat_seconds=30, filter_events=self.event_listener_filter
+                heartbeat_seconds=30, filter_events=list(self.event_listener_filter)
             ):
-                _LOGGER.debug(event)
+                _LOGGER.debug(
+                    "Received %s event on %s (%s)",
+                    event,
+                    self.fixed_config.machine_name,
+                    self.fixed_config.serial_number,
+                )
                 if isinstance(event, VideoMotionEvent):
                     self.amcrest_data.last_video_motion_event = event
                     self.async_update_listeners()
+                elif isinstance(event, AudioMutationEvent):
+                    self.amcrest_data.last_audio_mutation_event = event
+                    self.async_update_listeners()
         except Exception as e:
             _LOGGER.error(
-                "An exception occurred on event listener for device %s: %s",
-                self.data.get(CONF_NAME),
+                "An exception occurred on event listener for device %s (%s): %s",
+                self.fixed_config.machine_name,
+                self.fixed_config.serial_number,
                 e,
             )
         except asyncio.CancelledError:
             _LOGGER.info(
-                "Event listener for device %s cancelled", self.data.get(CONF_NAME)
+                "Event listener for device %s (%s) cancelled",
+                self.fixed_config.machine_name,
+                self.fixed_config.serial_number,
             )
         finally:
             _LOGGER.debug(
-                "Finished listening for motion events %s", self.data.get(CONF_NAME)
+                "Finished listening for motion events %s (%s)",
+                self.fixed_config.machine_name,
+                self.fixed_config.serial_number,
             )
 
     @property

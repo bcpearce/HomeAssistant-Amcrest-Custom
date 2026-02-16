@@ -29,6 +29,8 @@ async def async_setup_entry(
         entities.append(AmcrestPrivacyModeSwitch(coordinator))
     if EventMessageType.VideoMotion in coordinator.fixed_config.supported_events:
         entities.append(AmcrestEnableMotionDetectionSwitch(coordinator))
+    if EventMessageType.AudioMutation in coordinator.fixed_config.supported_events:
+        entities.append(AmcrestEnableAudioMutationDetectionSwitch(coordinator))
     async_add_entities(entities)
 
 
@@ -137,11 +139,11 @@ class AmcrestEnableMotionDetectionSwitch(AmcrestEntity, SwitchEntity):
         self.async_write_ha_state()
 
     async def async_turn_on(self, **kwargs: Any) -> None:
-        """Turn smart tracking on."""
+        """Turn motion detection on."""
         await self._handle_enable_motion_detection(True)
 
     async def async_turn_off(self, **kwargs: Any) -> None:
-        """Turn smart tracking off."""
+        """Turn motion detection off."""
         await self._handle_enable_motion_detection(False)
 
     @callback
@@ -149,5 +151,52 @@ class AmcrestEnableMotionDetectionSwitch(AmcrestEntity, SwitchEntity):
         self._attr_is_on = (
             self.coordinator.is_listening_for_events
             and EventMessageType.VideoMotion in self.coordinator.event_listener_filter
+        )
+        self.async_write_ha_state()
+
+
+class AmcrestEnableAudioMutationDetectionSwitch(AmcrestEntity, SwitchEntity):
+    """Audio Mutation Detection. Enables audio mutation detection."""
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "enable_audio_mutation_detection"
+    _attr_device_class = SwitchDeviceClass.SWITCH
+
+    def __init__(self, coordinator: AmcrestDataCoordinator) -> None:
+        """Initialize the switch."""
+        super().__init__(coordinator=coordinator)
+        self._attr_unique_id = (
+            f"{coordinator.fixed_config.serial_number}-enable_audio_mutation_detection"
+        )
+        self._attr_is_on = (
+            coordinator.is_listening_for_events
+            and EventMessageType.AudioMutation in coordinator.event_listener_filter
+        )
+
+    async def _handle_enable_audio_mutation_detection(self, turn_on: bool) -> None:
+        if turn_on:
+            await self.coordinator.api.async_set_audio_detect_on(True)
+            self.coordinator.async_enable_event_listener(EventMessageType.AudioMutation)
+        else:
+            await self.coordinator.async_disable_event_listener(
+                EventMessageType.AudioMutation
+            )
+            await self.coordinator.api.async_set_audio_detect_on(False)
+        self._attr_is_on = turn_on
+        self.async_write_ha_state()
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        """Turn audio mutation detection on."""
+        await self._handle_enable_audio_mutation_detection(True)
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        """Turn audio mutation detection off."""
+        await self._handle_enable_audio_mutation_detection(False)
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        self._attr_is_on = (
+            self.coordinator.is_listening_for_events
+            and EventMessageType.AudioMutation in self.coordinator.event_listener_filter
         )
         self.async_write_ha_state()

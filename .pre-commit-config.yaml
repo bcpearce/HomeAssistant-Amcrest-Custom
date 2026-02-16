@@ -9,9 +9,7 @@ repos:
     - id: check-json
     - id: check-toml
     - id: pretty-format-json
-      args:
-        - --autofix
-        - --top-keys=domain,title,name
+      args: [ "--autofix", "--top-keys=domain,title,name", "--no-ensure-ascii" ]
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.14.14
     hooks:

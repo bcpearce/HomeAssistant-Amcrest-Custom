@@ -39,6 +39,9 @@
   },
   "entity": {
     "binary_sensor": {
+      "audio_detected": {
+        "name": "Audio Detected"
+      },
       "motion_detected": {
         "name": "Motion Detected"
       }
@@ -61,9 +64,9 @@
       "video_image_control": {
         "name": "Video Image Control",
         "state": {
-          "clockwise_270": "Clockwise 270\u00b0",
-          "clockwise_90": "Clockwise 90\u00b0",
-          "flip_180": "Flip 180\u00b0",
+          "clockwise_270": "Clockwise 270°",
+          "clockwise_90": "Clockwise 90°",
+          "flip_180": "Flip 180°",
           "none": "None"
         }
       },
@@ -92,6 +95,9 @@
       }
     },
     "switch": {
+      "enable_audio_mutation_detection": {
+        "name": "Enable Audio Detection"
+      },
       "enable_motion_detection": {
         "name": "Enable Motion Detection"
       },
