@@ -75,9 +75,9 @@ DESCRIPTIONS: tuple[AmcrestSensorEntityDescription, ...] = (
         native_unit_of_measurement=UnitOfInformation.BYTES,
         suggested_unit_of_measurement=UnitOfInformation.GIGABYTES,
         exists_fn=lambda coordinator: len(coordinator.amcrest_data.storage_info) > 0,
-        value_fn=lambda coordinator: coordinator.amcrest_data.storage_info[
-            0
-        ].total_bytes,
+        value_fn=lambda coordinator: (
+            coordinator.amcrest_data.storage_info[0].total_bytes
+        ),
     ),
     AmcrestSensorEntityDescription(
         key="sd_card_used_capacity",
@@ -89,9 +89,9 @@ DESCRIPTIONS: tuple[AmcrestSensorEntityDescription, ...] = (
         native_unit_of_measurement=UnitOfInformation.BYTES,
         suggested_unit_of_measurement=UnitOfInformation.GIGABYTES,
         exists_fn=lambda coordinator: len(coordinator.amcrest_data.storage_info) > 0,
-        value_fn=lambda coordinator: coordinator.amcrest_data.storage_info[
-            0
-        ].used_bytes,
+        value_fn=lambda coordinator: (
+            coordinator.amcrest_data.storage_info[0].used_bytes
+        ),
     ),
 )
 
