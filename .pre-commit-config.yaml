@@ -11,30 +11,30 @@ repos:
     - id: pretty-format-json
       args: [ "--autofix", "--top-keys=domain,title,name", "--no-ensure-ascii" ]
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.4
+    rev: v0.15.9
     hooks:
     - id: ruff
       args: [ --fix ]
     - id: ruff-format
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: 'v1.19.1'  # Use the sha / tag you want to point at
+    rev: 'v1.20.0'  # Use the sha / tag you want to point at
     hooks:
     -   id: mypy
         additional_dependencies:
           - homeassistant
           - pytest
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.4.1
+    rev: v2.4.2
     hooks:
     - id: codespell
       exclude: "^tests/fixtures/mock_responses"
   - repo: https://github.com/rhysd/actionlint
-    rev: v1.7.11
+    rev: v1.7.12
     hooks:
     - id: actionlint
   - repo: https://github.com/astral-sh/uv-pre-commit
     # uv version.
-    rev: 0.10.7
+    rev: 0.11.3
     hooks:
       - id: uv-lock
       - id: uv-export
