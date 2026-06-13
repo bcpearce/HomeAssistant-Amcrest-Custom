@@ -11,13 +11,13 @@ repos:
     - id: pretty-format-json
       args: [ "--autofix", "--top-keys=domain,title,name", "--no-ensure-ascii" ]
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.9
+    rev: v0.15.15
     hooks:
     - id: ruff
       args: [ --fix ]
     - id: ruff-format
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: 'v1.20.0'  # Use the sha / tag you want to point at
+    rev: 'v2.1.0'  # Use the sha / tag you want to point at
     hooks:
     -   id: mypy
         additional_dependencies:
@@ -34,7 +34,7 @@ repos:
     - id: actionlint
   - repo: https://github.com/astral-sh/uv-pre-commit
     # uv version.
-    rev: 0.11.3
+    rev: 0.11.17
     hooks:
       - id: uv-lock
       - id: uv-export
