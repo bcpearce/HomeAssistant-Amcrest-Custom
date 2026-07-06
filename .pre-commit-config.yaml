@@ -11,7 +11,7 @@ repos:
     - id: pretty-format-json
       args: [ "--autofix", "--top-keys=domain,title,name", "--no-ensure-ascii" ]
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.15
+    rev: v0.15.20
     hooks:
     - id: ruff
       args: [ --fix ]
@@ -34,7 +34,7 @@ repos:
     - id: actionlint
   - repo: https://github.com/astral-sh/uv-pre-commit
     # uv version.
-    rev: 0.11.17
+    rev: 0.11.26
     hooks:
       - id: uv-lock
       - id: uv-export
